@@ -16,17 +16,19 @@ import java.util.UUID;
 @Entity
 @Table(name = "tokens")
 public class TokenModel {
+    @Builder.Default
     @Id
     @Column(name = "token_id", nullable = false, updatable = false)
-    private UUID tokenId;
+    private UUID tokenId = UUID.randomUUID();
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = false, nullable = false, updatable = false)
     private UserModel user;
 
+    @Builder.Default
     @Column(name = "is_revoked", unique = false, nullable = false)
-    private Boolean isRevoked = false;
+    private boolean isRevoked = false;
 
     @Column(name = "signed_at", unique = false, nullable = false, updatable = false)
     private Instant signedAt;
@@ -55,7 +57,6 @@ public class TokenModel {
     public String toString() {
         return "TokenModel{" +
                 "tokenId=" + tokenId +
-                ", user=" + user +
                 ", isRevoked=" + isRevoked +
                 ", signedAt=" + signedAt +
                 ", expiresAt=" + expiresAt +

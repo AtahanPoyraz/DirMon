@@ -25,8 +25,8 @@ public interface AdminService {
     UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest);
 
     @Transactional
-    List<UserModel> deleteUserByUserIds(List<UUID> userIds);
+    UserModel deleteUserByUserId(UUID userId);
 
     @Transactional
-    UserModel deleteUserByUserId(UUID userId);
+    List<UserModel> deleteUserByUserIds(List<UUID> userIds);
 }

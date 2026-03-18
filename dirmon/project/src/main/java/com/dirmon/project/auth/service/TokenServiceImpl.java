@@ -101,7 +101,7 @@ public class TokenServiceImpl implements TokenService {
         return createToken(
                 tokenId.toString(),
                 userId.toString(),
-                Map.of("enabled", userEntity.getEnabled() ,"roles", roles),
+                Map.of("enabled", userEntity.isEnabled() ,"roles", roles),
                 TimeProvider.convertInstantToDate(issuedAt),
                 TimeProvider.convertInstantToDate(expiration)
         );
@@ -146,11 +146,10 @@ public class TokenServiceImpl implements TokenService {
         Claims tokenClaims = this.parseAndValidateToken(refreshToken);
 
         UUID tokenId = UUID.fromString(tokenClaims.getId());
-
         TokenModel tokenEntity = this.tokenRepository.findById(tokenId)
                 .orElseThrow(() -> new TokenNotValidException("Token not found"));
 
-        if (tokenEntity.getIsRevoked()) {
+        if (tokenEntity.isRevoked()) {
             throw new TokenNotValidException("Token is revoked");
         }
 

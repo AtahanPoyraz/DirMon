@@ -89,7 +89,7 @@ public class AdminController {
 
     @DeleteMapping("/user")
     public ResponseEntity<@NonNull GenericResponse<?>> deleteUser(
-            @RequestParam List<UUID> userId
+            @RequestParam(required = true) List<UUID> userId
     ) {
         if (userId.isEmpty()) return GenericResponse.genericResponse(
                 HttpStatus.BAD_REQUEST,
@@ -97,11 +97,14 @@ public class AdminController {
                 null
         );
 
-        if (userId.size() == 1) return GenericResponse.genericResponse(
-                HttpStatus.OK,
-                "User was deleted successfully",
-                this.adminService.deleteUserByUserId(userId.getFirst())
-        );
+        if (userId.size() == 1) {
+            UserModel userEntity = this.adminService.deleteUserByUserId(userId.getFirst());
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "User was deleted successfully",
+                    userEntity
+            );
+        }
 
         List<UserModel> userEntities = this.adminService.deleteUserByUserIds(userId);
         return GenericResponse.genericResponse(

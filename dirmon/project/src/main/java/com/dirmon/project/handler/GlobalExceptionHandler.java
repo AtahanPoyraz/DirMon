@@ -3,6 +3,7 @@ package com.dirmon.project.handler;
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.common.exception.*;
 import lombok.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -31,8 +32,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull GenericResponse<?>> handleAuthenticationExceptions(
             AuthenticationException e
     ) {
-        return  GenericResponse.genericResponse(
+        return GenericResponse.genericResponse(
                 HttpStatus.UNAUTHORIZED,
+                e.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AgentNotFoundException.class)
+    public ResponseEntity<@NonNull GenericResponse<?>> handleAgentNotFoundException(
+            AgentNotFoundException e
+    ) {
+        return GenericResponse.genericResponse(
+                HttpStatus.NOT_FOUND,
                 e.getMessage(),
                 null
         );
@@ -56,6 +68,17 @@ public class GlobalExceptionHandler {
     ) {
         return GenericResponse.genericResponse(
                 HttpStatus.UNAUTHORIZED,
+                e.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<@NonNull GenericResponse<?>> handleDataIntegrityViolationException(
+            DataIntegrityViolationException e
+    ) {
+        return GenericResponse.genericResponse(
+                HttpStatus.BAD_REQUEST,
                 e.getMessage(),
                 null
         );

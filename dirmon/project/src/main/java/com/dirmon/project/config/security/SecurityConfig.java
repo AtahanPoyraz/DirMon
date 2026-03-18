@@ -78,7 +78,8 @@ public class SecurityConfig {
                         "/actuator/health",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
-                        "/api/v1/auth/**"
+                        "/api/v1/auth/**",
+                        "/api/v1/agent/status"
                 )
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                         .anyRequest()
@@ -102,7 +103,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                                 .requestMatchers(
-                                        "/api/v1/user/**"
+                                        "/api/v1/user/**",
+                                        "/api/v1/agent/**"
                                 )
                                 .hasAnyRole("ADMIN", "USER")
                                 .requestMatchers(

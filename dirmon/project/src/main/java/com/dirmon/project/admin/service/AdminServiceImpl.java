@@ -38,9 +38,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public UserModel fetchUserById(@NonNull UUID uuid) {
-        return this.userRepository.findById(uuid)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + uuid));
+    public UserModel fetchUserById(@NonNull UUID userId) {
+        return this.userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
     }
 
     @Override
@@ -122,25 +122,30 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public List<UserModel> deleteUserByUserIds(List<UUID> userIds) {
-        List<UserModel> userEntities = userRepository.findAllById(userIds);
-        Set<UUID> foundIds = userEntities.stream().map(UserModel::getUserId).collect(Collectors.toSet());
-
-        userIds.stream().filter(userId -> !foundIds.contains(userId)).findFirst().ifPresent(missingId -> {
-            throw new UserNotFoundException("User not found with id: " + missingId);
-        });
-
-        this.userRepository.deleteAll(userEntities);
-        return userEntities;
-    }
-
-    @Override
-    @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
         this.userRepository.delete(userEntity);
         return userEntity;
+    }
+
+    @Override
+    @Transactional
+    public List<UserModel> deleteUserByUserIds(List<UUID> userIds) {
+        List<UserModel> userEntities = this.userRepository.findAllById(userIds);
+        Set<UUID> foundIds = userEntities.stream()
+                .map(UserModel::getUserId)
+                .collect(Collectors.toSet());
+
+        userIds.stream()
+                .filter(userId -> !foundIds.contains(userId))
+                .findFirst()
+                .ifPresent(missingId -> {
+                    throw new UserNotFoundException("User not found with id: " + missingId);
+                });
+
+        this.userRepository.deleteAll(userEntities);
+        return userEntities;
     }
 }
