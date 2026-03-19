@@ -26,15 +26,12 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
 
-    private final ApplicationLogger applicationLogger;
 
     @Autowired
     public JwtAuthenticationFilter(
-            TokenService tokenService,
-            ApplicationLogger applicationLogger
+            TokenService tokenService
     ) {
         this.tokenService = tokenService;
-        this.applicationLogger = applicationLogger;
     }
 
     @Override
@@ -90,7 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
 
         } catch (Exception e) {
-            this.applicationLogger.warn(
+            ApplicationLogger.warn(
                     JwtAuthenticationFilter.class,
                     String.format("Access token parsing FAILED in JwtAuthenticationFilter: %s", e.getMessage())
             );

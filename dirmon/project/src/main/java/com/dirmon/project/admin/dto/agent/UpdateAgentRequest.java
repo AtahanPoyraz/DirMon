@@ -1,0 +1,4 @@
+package com.dirmon.project.admin.dto.agent;
+
+public class UpdateAgentRequest {
+}

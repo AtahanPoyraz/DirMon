@@ -1,7 +1,7 @@
 package com.dirmon.project.admin.controller;
 
-import com.dirmon.project.admin.dto.CreateUserRequest;
-import com.dirmon.project.admin.dto.UpdateUserRequest;
+import com.dirmon.project.admin.dto.user.CreateUserRequest;
+import com.dirmon.project.admin.dto.user.UpdateUserRequest;
 import com.dirmon.project.admin.service.AdminService;
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.user.model.UserModel;

@@ -1,7 +1,8 @@
 package com.dirmon.project.admin.service;
 
-import com.dirmon.project.admin.dto.CreateUserRequest;
-import com.dirmon.project.admin.dto.UpdateUserRequest;
+import com.dirmon.project.admin.dto.user.CreateUserRequest;
+import com.dirmon.project.admin.dto.user.UpdateUserRequest;
+import com.dirmon.project.agent.repository.AgentRepository;
 import com.dirmon.project.common.exception.EmailAlreadyExistException;
 import com.dirmon.project.common.exception.UserNotFoundException;
 import com.dirmon.project.user.model.UserModel;
@@ -21,14 +22,17 @@ import java.util.stream.Collectors;
 @Service
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
+    private final AgentRepository agentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AdminServiceImpl(
             UserRepository userRepository,
+            AgentRepository agentRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
+        this.agentRepository = agentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
