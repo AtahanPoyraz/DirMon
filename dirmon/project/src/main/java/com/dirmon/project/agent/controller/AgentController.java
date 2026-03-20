@@ -113,19 +113,19 @@ public class AgentController {
         );
 
         if (agentId.size() == 1) {
-            AgentModel agentEntity = this.agentService.deleteAgentByUserIdAndAgentId(userEntity.getUserId(), agentId.getFirst());
+            this.agentService.deleteAgentByUserIdAndAgentId(userEntity.getUserId(), agentId.getFirst());
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "Agent was deleted successfully",
-                    agentEntity
+                    null
             );
         }
 
-        List<AgentModel> agentEntities = this.agentService.deleteAllAgentsByUserIdAndAgentIds(userEntity.getUserId(), agentId);
+        this.agentService.deleteAllAgentsByUserIdAndAgentIds(userEntity.getUserId(), agentId);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Users were deleted successfully",
-                agentEntities
+                null
         );
     }
 

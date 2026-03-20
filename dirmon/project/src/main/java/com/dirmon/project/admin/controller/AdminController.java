@@ -1,8 +1,11 @@
 package com.dirmon.project.admin.controller;
 
+import com.dirmon.project.admin.dto.agent.CreateAgentRequest;
+import com.dirmon.project.admin.dto.agent.UpdateAgentRequest;
 import com.dirmon.project.admin.dto.user.CreateUserRequest;
 import com.dirmon.project.admin.dto.user.UpdateUserRequest;
 import com.dirmon.project.admin.service.AdminService;
+import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.user.model.UserModel;
 import jakarta.validation.Valid;
@@ -91,26 +94,141 @@ public class AdminController {
     public ResponseEntity<@NonNull GenericResponse<?>> deleteUser(
             @RequestParam(required = true) List<UUID> userId
     ) {
-        if (userId.isEmpty()) return GenericResponse.genericResponse(
-                HttpStatus.BAD_REQUEST,
-                "No userIds provided",
-                null
-        );
-
-        if (userId.size() == 1) {
-            UserModel userEntity = this.adminService.deleteUserByUserId(userId.getFirst());
+        if (userId.isEmpty()) {
             return GenericResponse.genericResponse(
-                    HttpStatus.OK,
-                    "User was deleted successfully",
-                    userEntity
+                    HttpStatus.BAD_REQUEST,
+                    "No userIds provided",
+                    null
             );
         }
 
-        List<UserModel> userEntities = this.adminService.deleteUserByUserIds(userId);
+        if (userId.size() == 1) {
+            this.adminService.deleteUserByUserId(userId.getFirst());
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "User was deleted successfully",
+                    null
+            );
+        }
+
+        this.adminService.deleteUserByUserIds(userId);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Users were deleted successfully",
-                userEntities
+                null
+        );
+    }
+
+    @GetMapping("/agent")
+    public ResponseEntity<@NonNull GenericResponse<?>> fetchAgent(
+            @RequestParam(required = false) UUID agentId,
+            @RequestParam(required = false) UUID userId,
+            @ParameterObject Pageable pageable
+    ) {
+        if (userId != null && agentId != null) {
+            AgentModel agentEntity = this.adminService.fetchAgentByUserIdAndAgentId(userId, agentId);
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "Agent was fetched successfully",
+                    agentEntity
+            );
+        }
+
+        if (agentId != null) {
+            AgentModel agentEntity = this.adminService.fetchAgentById(agentId);
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "Agent was fetched successfully",
+                    agentEntity
+            );
+        }
+
+        if (userId != null) {
+            List<AgentModel> agentEntity = this.adminService.fetchAgentsByUserId(userId);
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "Agents were fetched successfully",
+                    agentEntity
+            );
+        }
+
+        Page<@NonNull AgentModel> agentEntities = this.adminService.fetchAgents(pageable);
+        return GenericResponse.genericResponse(
+                HttpStatus.OK,
+                "Agents were fetched successfully",
+                agentEntities
+        );
+    }
+
+    @PostMapping("/agent")
+    public ResponseEntity<@NonNull GenericResponse<?>> createAgent(
+            @Valid @RequestBody CreateAgentRequest createAgentRequest
+    ) {
+        AgentModel agentEntity = this.adminService.createAgent(createAgentRequest);
+        return GenericResponse.genericResponse(
+                HttpStatus.CREATED,
+                "Agent was created successfully",
+                agentEntity
+        );
+    }
+
+    @PatchMapping("/agent")
+    public ResponseEntity<@NonNull GenericResponse<?>> updateAgent(
+            @RequestParam(required = true) UUID agentId,
+            @Valid @RequestBody UpdateAgentRequest updateAgentRequest
+    ) {
+        AgentModel agentEntity = this.adminService.updateAgentByAgentId(agentId, updateAgentRequest);
+        return GenericResponse.genericResponse(
+                HttpStatus.OK,
+                "Agent was updated successfully",
+                agentEntity
+        );
+    }
+
+    @DeleteMapping("/agent")
+    public ResponseEntity<@NonNull GenericResponse<?>> deleteAgent(
+            @RequestParam(required = false) List<UUID> agentId,
+            @RequestParam(required = false) UUID userId
+    ) {
+        if (userId != null && agentId != null) {
+            return GenericResponse.genericResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "Provide either userId or agentIds, not both",
+                    null
+            );
+        }
+
+        if ((agentId == null || agentId.isEmpty()) && userId == null) {
+            return GenericResponse.genericResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "No agentIds or userId provided",
+                    null
+            );
+        }
+
+        if (userId != null) {
+            this.adminService.deleteAgentsByUserId(userId);
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "Agents were deleted successfully for userId",
+                    null
+            );
+        }
+
+        if (agentId.size() == 1) {
+            this.adminService.deleteAgentByAgentId(agentId.getFirst());
+            return GenericResponse.genericResponse(
+                    HttpStatus.OK,
+                    "Agent was deleted successfully",
+                    null
+            );
+        }
+
+        this.adminService.deleteAgentsByAgentIds(agentId);
+        return GenericResponse.genericResponse(
+                HttpStatus.OK,
+                "Agents were deleted successfully",
+                null
         );
     }
 }

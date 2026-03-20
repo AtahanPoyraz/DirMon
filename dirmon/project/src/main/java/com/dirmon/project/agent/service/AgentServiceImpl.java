@@ -88,16 +88,15 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     @Transactional
-    public AgentModel deleteAgentByUserIdAndAgentId(UUID userId, UUID agentId) {
+    public void deleteAgentByUserIdAndAgentId(UUID userId, UUID agentId) {
         AgentModel agentModel = this.agentRepository.findByUserIdAndAgentId(userId, agentId)
                 .orElseThrow(() -> new AgentNotFoundException("Agent not found with userId: " + userId + " and id: " + agentId));
 
         this.agentRepository.delete(agentModel);
-        return agentModel;
     }
 
     @Transactional
-    public List<AgentModel> deleteAllAgentsByUserIdAndAgentIds(UUID userId, List<UUID> agentIds) {
+    public void deleteAllAgentsByUserIdAndAgentIds(UUID userId, List<UUID> agentIds) {
         List<AgentModel> agentEntities = this.agentRepository.findAllByUser_UserIdAndAgentIdIn(userId, agentIds);
         Set<UUID> foundIds = agentEntities.stream()
                 .map(AgentModel::getAgentId)
@@ -111,6 +110,5 @@ public class AgentServiceImpl implements AgentService {
                 });
 
         this.agentRepository.deleteAll(agentEntities);
-        return agentEntities;
     }
 }

@@ -29,5 +29,9 @@ public interface AgentRepository extends JpaRepository<@NonNull AgentModel, @Non
     """)
     int setAgentStatusInactive(@Param("thresholdTime") Instant thresholdTime);
 
+    @Modifying
+    @Query("DELETE FROM AgentModel a WHERE a.user.userId = :userId")
+    int deleteAgentsByUserId(@Param("userId") UUID userId);
+
     List<AgentModel> findAllByUser_UserIdAndAgentIdIn(UUID userId, List<UUID> agentIds);
 }

@@ -23,8 +23,8 @@ public interface AgentService {
     AgentModel updateAgentStatusByAgentId(UUID agentId, AgentStatus agentStatus);
 
     @Transactional
-    AgentModel deleteAgentByUserIdAndAgentId(UUID userId, UUID agentId);
+    void deleteAgentByUserIdAndAgentId(UUID userId, UUID agentId);
 
     @Transactional
-    List<AgentModel> deleteAllAgentsByUserIdAndAgentIds(UUID userId, List<UUID> agentIds);
+    void deleteAllAgentsByUserIdAndAgentIds(UUID userId, List<UUID> agentIds);
 }

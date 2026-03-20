@@ -1,7 +1,10 @@
 package com.dirmon.project.admin.service;
 
+import com.dirmon.project.admin.dto.agent.CreateAgentRequest;
+import com.dirmon.project.admin.dto.agent.UpdateAgentRequest;
 import com.dirmon.project.admin.dto.user.CreateUserRequest;
 import com.dirmon.project.admin.dto.user.UpdateUserRequest;
+import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.user.model.UserModel;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
@@ -25,8 +28,31 @@ public interface AdminService {
     UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest);
 
     @Transactional
-    UserModel deleteUserByUserId(UUID userId);
+    void deleteUserByUserId(UUID userId);
 
     @Transactional
-    List<UserModel> deleteUserByUserIds(List<UUID> userIds);
+    void deleteUserByUserIds(List<UUID> userIds);
+
+    Page<@NonNull AgentModel> fetchAgents(Pageable pageable);
+
+    AgentModel fetchAgentById(UUID agentId);
+
+    List<AgentModel> fetchAgentsByUserId(UUID userId);
+
+    AgentModel fetchAgentByUserIdAndAgentId(UUID userId, UUID agentId);
+
+    @Transactional
+    AgentModel createAgent(CreateAgentRequest createAgentRequest);
+
+    @Transactional
+    AgentModel updateAgentByAgentId(UUID agentId, UpdateAgentRequest updateAgentRequest);
+
+    @Transactional
+    void deleteAgentByAgentId(UUID agentId);
+
+    @Transactional
+    void deleteAgentsByAgentIds(List<UUID> agentIds);
+
+    @Transactional
+    void deleteAgentsByUserId(UUID userId);
 }
