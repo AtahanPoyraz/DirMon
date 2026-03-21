@@ -80,7 +80,7 @@ public class UserModel implements UserDetails {
     private List<TokenModel> refreshTokens = new ArrayList<>();
 
     @Builder.Default
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(
             mappedBy = "user",
             fetch = FetchType.LAZY,
