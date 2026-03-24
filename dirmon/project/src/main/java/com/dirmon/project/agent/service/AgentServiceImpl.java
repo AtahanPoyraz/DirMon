@@ -78,11 +78,11 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     @Transactional
-    public AgentModel updateAgentStatusByAgentId(UUID agentId, AgentStatus agentStatus) {
+    public AgentModel activateAgentByAgentId(UUID agentId) {
         AgentModel agentEntity = this.agentRepository.findById(agentId)
                 .orElseThrow(() -> new AgentNotFoundException("Agent not found with id: " + agentId));
 
-        agentEntity.setStatus(agentStatus);
+        agentEntity.setStatus(AgentStatus.STATUS_ACTIVE);
         return this.agentRepository.save(agentEntity);
     }
 

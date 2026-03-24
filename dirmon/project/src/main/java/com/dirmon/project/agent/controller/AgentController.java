@@ -88,12 +88,11 @@ public class AgentController {
         );
     }
 
-    @PatchMapping("/status")
+    @PostMapping("/activate")
     public ResponseEntity<@NonNull GenericResponse<?>> updateAgentStatus(
-            @RequestParam(required = true) UUID agentId,
-            @RequestParam(required = true) AgentStatus status
+            @RequestParam(required = true) UUID agentId
     ) {
-        AgentModel agentEntity = this.agentService.updateAgentStatusByAgentId(agentId, status);
+        AgentModel agentEntity = this.agentService.activateAgentByAgentId(agentId);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agent status was updated successfully",
@@ -106,11 +105,13 @@ public class AgentController {
             @RequestParam(required = true) List<UUID> agentId
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
-        if (agentId.isEmpty()) return GenericResponse.genericResponse(
-                HttpStatus.BAD_REQUEST,
-                "No agentIds provided",
-                null
-        );
+        if (agentId.isEmpty()) {
+            return GenericResponse.genericResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "No agentIds provided",
+                    null
+            );
+        }
 
         if (agentId.size() == 1) {
             this.agentService.deleteAgentByUserIdAndAgentId(userEntity.getUserId(), agentId.getFirst());

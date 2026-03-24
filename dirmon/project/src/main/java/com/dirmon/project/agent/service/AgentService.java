@@ -20,7 +20,7 @@ public interface AgentService {
     AgentModel updateAgentDetailsByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentRequest updateAgentRequest);
 
     @Transactional
-    AgentModel updateAgentStatusByAgentId(UUID agentId, AgentStatus agentStatus);
+    AgentModel activateAgentByAgentId(UUID agentId);
 
     @Transactional
     void deleteAgentByUserIdAndAgentId(UUID userId, UUID agentId);
