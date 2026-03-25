@@ -1,8 +1,8 @@
 package com.dirmon.project.auth.service;
 
-import com.dirmon.project.auth.model.TokenModel;
-import com.dirmon.project.auth.repository.TokenRepository;
-import com.dirmon.project.common.exception.TokenNotValidException;
+import com.dirmon.project.auth.model.RefreshTokenModel;
+import com.dirmon.project.auth.repository.RefreshTokenRepository;
+import com.dirmon.project.common.exception.JWTNotValidException;
 import com.dirmon.project.user.model.UserModel;
 import com.dirmon.project.util.TimeProvider;
 import io.jsonwebtoken.Claims;
@@ -23,8 +23,8 @@ import java.time.Instant;
 import java.util.*;
 
 @Service
-public class TokenServiceImpl implements TokenService {
-    @Value("${spring.security.token.secret}")
+public class JWTServiceImpl implements JWTService {
+    @Value("${spring.security.token.auth.secret}")
     private String secret;
 
     @Value("${spring.security.token.access.expiration}")
@@ -35,13 +35,13 @@ public class TokenServiceImpl implements TokenService {
 
     private SecretKey secretKey;
 
-    private final TokenRepository tokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    public TokenServiceImpl(
-            TokenRepository tokenRepository
+    public JWTServiceImpl(
+            RefreshTokenRepository refreshTokenRepository
     ) {
-        this.tokenRepository = tokenRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @PostConstruct
@@ -75,10 +75,10 @@ public class TokenServiceImpl implements TokenService {
                     .getPayload();
 
         } catch (ExpiredJwtException e) {
-            throw new TokenNotValidException("Token expired");
+            throw new JWTNotValidException("Token expired");
 
         } catch (JwtException e) {
-            throw new TokenNotValidException("Token invalid");
+            throw new JWTNotValidException("Token invalid");
         }
     }
 
@@ -98,7 +98,7 @@ public class TokenServiceImpl implements TokenService {
         Instant issuedAt = Instant.now();
         Instant expiration = issuedAt.plusMillis(this.accessExpire);
 
-        return createToken(
+        return this.createToken(
                 tokenId.toString(),
                 userId.toString(),
                 Map.of("enabled", userEntity.isEnabled() ,"roles", roles),
@@ -108,7 +108,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Claims validateAccessToken(String accessToken) throws TokenNotValidException {
+    public Claims validateAccessToken(String accessToken) throws JWTNotValidException {
         return this.parseAndValidateToken(accessToken);
     }
 
@@ -122,7 +122,7 @@ public class TokenServiceImpl implements TokenService {
         Instant issuedAt = Instant.now();
         Instant expiration = issuedAt.plusMillis(this.refreshExpire);
 
-        TokenModel tokenEntity = TokenModel.builder()
+        RefreshTokenModel tokenEntity = RefreshTokenModel.builder()
                 .tokenId(tokenId)
                 .user(userEntity)
                 .isRevoked(false)
@@ -130,7 +130,7 @@ public class TokenServiceImpl implements TokenService {
                 .expiresAt(expiration)
                 .build();
 
-        this.tokenRepository.save(tokenEntity);
+        this.refreshTokenRepository.save(tokenEntity);
 
         return this.createToken(
                 tokenId.toString(),
@@ -142,43 +142,42 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public Claims validateRefreshToken(String refreshToken) throws TokenNotValidException {
+    public Claims validateRefreshToken(String refreshToken) throws JWTNotValidException {
         Claims tokenClaims = this.parseAndValidateToken(refreshToken);
 
         UUID tokenId = UUID.fromString(tokenClaims.getId());
-        TokenModel tokenEntity = this.tokenRepository.findById(tokenId)
-                .orElseThrow(() -> new TokenNotValidException("Token not found"));
+        RefreshTokenModel tokenEntity = this.refreshTokenRepository.findById(tokenId)
+                .orElseThrow(() -> new JWTNotValidException("Token not found"));
 
         if (tokenEntity.isRevoked()) {
-            throw new TokenNotValidException("Token is revoked");
+            throw new JWTNotValidException("Token is revoked");
         }
 
         return tokenClaims;
     }
 
     @Override
-    public String extractId(String token) throws TokenNotValidException {
+    public String extractId(String token) throws JWTNotValidException {
         Claims tokenClaims = this.parseAndValidateToken(token);
         if (tokenClaims.getId() == null) {
-            throw new TokenNotValidException("Token not valid");
+            throw new JWTNotValidException("Token not valid");
         }
 
         return tokenClaims.getId();
     }
 
     @Override
-    public String extractSubject(String token) throws TokenNotValidException {
+    public String extractSubject(String token) throws JWTNotValidException {
         Claims tokenClaims = this.parseAndValidateToken(token);
         if (tokenClaims.getSubject() == null) {
-            throw new TokenNotValidException("Token not valid");
+            throw new JWTNotValidException("Token not valid");
         }
 
         return tokenClaims.getSubject();
     }
 
-
     @Override
-    public Instant extractExpiration(String token) throws TokenNotValidException {
+    public Instant extractExpiration(String token) throws JWTNotValidException {
         Claims tokenClaims = this.parseAndValidateToken(token);
         return TimeProvider.convertDateToInstant(tokenClaims.getExpiration());
     }
@@ -186,12 +185,12 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional
     public void revokeAllTokensByUser(UserModel userEntity) {
-        this.tokenRepository.revokeAllTokensByUserId(userEntity.getUserId());
+        this.refreshTokenRepository.revokeAllTokensByUserId(userEntity.getUserId());
     }
 
     @Override
     @Transactional
     public void revokeTokenByTokenId(UUID tokenId) {
-        this.tokenRepository.revokeTokenById(tokenId);
+        this.refreshTokenRepository.revokeTokenById(tokenId);
     }
 }

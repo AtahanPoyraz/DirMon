@@ -1,9 +1,8 @@
 package com.dirmon.project.user.model;
 
 import com.dirmon.project.agent.model.AgentModel;
-import com.dirmon.project.auth.model.TokenModel;
+import com.dirmon.project.auth.model.RefreshTokenModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -77,7 +76,7 @@ public class UserModel implements UserDetails {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<TokenModel> refreshTokens = new ArrayList<>();
+    private List<RefreshTokenModel> refreshTokens = new ArrayList<>();
 
     @Builder.Default
     @JsonIgnore

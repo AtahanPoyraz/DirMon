@@ -117,9 +117,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(TokenNotValidException.class)
+    @ExceptionHandler(JWTNotValidException.class)
     public ResponseEntity<@NonNull GenericResponse<?>> handleTokenNotValidException(
-            TokenNotValidException e
+            JWTNotValidException e
     ) {
         return GenericResponse.genericResponse(
                 HttpStatus.UNAUTHORIZED,

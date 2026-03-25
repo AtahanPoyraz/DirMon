@@ -3,7 +3,7 @@ package com.dirmon.project.auth.controller;
 import com.dirmon.project.auth.dto.SignInRequest;
 import com.dirmon.project.auth.dto.SignUpRequest;
 import com.dirmon.project.auth.service.AuthService;
-import com.dirmon.project.auth.service.TokenService;
+import com.dirmon.project.auth.service.JWTService;
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.common.exception.CookieNotFoundException;
 import com.dirmon.project.user.model.UserModel;
@@ -34,17 +34,17 @@ import java.util.UUID;
 public class AuthController {
     private final AuthService authService;
     private final UserService userService;
-    private final TokenService tokenService;
+    private final JWTService jwtService;
 
     @Autowired
     public AuthController(
             AuthService authService,
             UserService userService,
-            TokenService tokenService
+            JWTService jwtService
     ) {
         this.authService = authService;
         this.userService = userService;
-        this.tokenService = tokenService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/sign-up")
@@ -55,8 +55,8 @@ public class AuthController {
     ) {
         UserModel userEntity = this.authService.signUp(signUpRequest);
 
-        String accessToken = this.tokenService.generateAccessToken(userEntity);
-        Instant accessTokenExpire = this.tokenService.extractExpiration(accessToken);
+        String accessToken = this.jwtService.generateAccessToken(userEntity);
+        Instant accessTokenExpire = this.jwtService.extractExpiration(accessToken);
 
         this.setCookie(
                 httpServletResponse,
@@ -69,8 +69,8 @@ public class AuthController {
                 TimeProvider.convertInstantToDate(accessTokenExpire)
         );
 
-        String refreshToken = this.tokenService.generateRefreshToken(userEntity);
-        Instant refreshTokenExpire = this.tokenService.extractExpiration(refreshToken);
+        String refreshToken = this.jwtService.generateRefreshToken(userEntity);
+        Instant refreshTokenExpire = this.jwtService.extractExpiration(refreshToken);
 
         this.setCookie(
                 httpServletResponse,
@@ -98,10 +98,10 @@ public class AuthController {
     ) {
         UserModel userEntity = this.authService.signIn(signInRequest);
 
-        this.tokenService.revokeAllTokensByUser(userEntity);
+        this.jwtService.revokeAllTokensByUser(userEntity);
 
-        String accessToken = this.tokenService.generateAccessToken(userEntity);
-        Instant accessTokenExpire = this.tokenService.extractExpiration(accessToken);
+        String accessToken = this.jwtService.generateAccessToken(userEntity);
+        Instant accessTokenExpire = this.jwtService.extractExpiration(accessToken);
 
         this.setCookie(
                 httpServletResponse,
@@ -114,8 +114,8 @@ public class AuthController {
                 TimeProvider.convertInstantToDate(accessTokenExpire)
         );
 
-        String refreshToken = this.tokenService.generateRefreshToken(userEntity);
-        Instant refreshTokenExpire = this.tokenService.extractExpiration(refreshToken);
+        String refreshToken = this.jwtService.generateRefreshToken(userEntity);
+        Instant refreshTokenExpire = this.jwtService.extractExpiration(refreshToken);
 
         this.setCookie(
                 httpServletResponse,
@@ -143,12 +143,12 @@ public class AuthController {
         Cookie refreshTokenCookie = this.getCookie(httpServletRequest, "REFRESH_TOKEN");
         String refreshToken = refreshTokenCookie.getValue();
 
-        String refreshTokenSubject = this.tokenService.extractSubject(refreshToken);
+        String refreshTokenSubject = this.jwtService.extractSubject(refreshToken);
 
         UUID userId = UUID.fromString(refreshTokenSubject);
         UserModel userEntity = this.userService.fetchUserByUserId(userId);
 
-        this.tokenService.revokeAllTokensByUser(userEntity);
+        this.jwtService.revokeAllTokensByUser(userEntity);
 
         this.setCookie(
                 httpServletResponse,
@@ -187,20 +187,20 @@ public class AuthController {
         Cookie refreshTokenCookie = this.getCookie(httpServletRequest, "REFRESH_TOKEN");
         String refreshTokenCookieValue = refreshTokenCookie.getValue();
 
-        Claims refreshTokenClaims = this.tokenService.validateRefreshToken(refreshTokenCookieValue);
+        Claims refreshTokenClaims = this.jwtService.validateRefreshToken(refreshTokenCookieValue);
 
         String id = refreshTokenClaims.getId();
         UUID tokenId = UUID.fromString(id);
 
-        this.tokenService.revokeTokenByTokenId(tokenId);
+        this.jwtService.revokeTokenByTokenId(tokenId);
 
         String subject = refreshTokenClaims.getSubject();
         UUID userId = UUID.fromString(subject);
 
         UserModel userEntity = this.userService.fetchUserByUserId(userId);
 
-        String accessToken = this.tokenService.generateAccessToken(userEntity);
-        Instant accessTokenExpire = this.tokenService.extractExpiration(accessToken);
+        String accessToken = this.jwtService.generateAccessToken(userEntity);
+        Instant accessTokenExpire = this.jwtService.extractExpiration(accessToken);
 
         this.setCookie(
                 httpServletResponse,
@@ -213,8 +213,8 @@ public class AuthController {
                 TimeProvider.convertInstantToDate(accessTokenExpire)
         );
 
-        String refreshToken = this.tokenService.generateRefreshToken(userEntity);
-        Instant refreshTokenExpire = this.tokenService.extractExpiration(refreshToken);
+        String refreshToken = this.jwtService.generateRefreshToken(userEntity);
+        Instant refreshTokenExpire = this.jwtService.extractExpiration(refreshToken);
 
         this.setCookie(
                 httpServletResponse,

@@ -3,8 +3,8 @@ package com.dirmon.project.agent.controller;
 import com.dirmon.project.agent.dto.CreateAgentRequest;
 import com.dirmon.project.agent.dto.UpdateAgentRequest;
 import com.dirmon.project.agent.model.AgentModel;
-import com.dirmon.project.agent.model.AgentStatus;
 import com.dirmon.project.agent.service.AgentService;
+import com.dirmon.project.agent.service.AgentTokenService;
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.user.model.UserModel;
 import com.dirmon.project.user.service.UserService;
@@ -28,14 +28,17 @@ import java.util.UUID;
 @RequestMapping("/api/v1/agent")
 public class AgentController {
     private final AgentService agentService;
+    private final AgentTokenService agentTokenService;
     private final UserService userService;
 
     @Autowired
     public AgentController(
             AgentService agentService,
+            AgentTokenService agentTokenService,
             UserService userService
     ) {
         this.agentService = agentService;
+        this.agentTokenService = agentTokenService;
         this.userService = userService;
     }
 
@@ -88,8 +91,23 @@ public class AgentController {
         );
     }
 
+    @PostMapping("/token")
+    public ResponseEntity<@NonNull GenericResponse<?>> createAgentToken(
+            @RequestParam(required = true) UUID agentId
+    ) {
+        UserModel userEntity = this.getUserFromSecurityContext();
+        AgentModel agentEntity = this.agentService.fetchAgentByUserIdAndAgentId(userEntity.getUserId(), agentId);
+
+        String agentToken = this.agentTokenService.generateAgentToken(agentEntity);
+        return GenericResponse.genericResponse(
+                HttpStatus.OK,
+                "Agent token was generated successfully",
+                agentToken
+        );
+    }
+
     @PostMapping("/activate")
-    public ResponseEntity<@NonNull GenericResponse<?>> updateAgentStatus(
+    public ResponseEntity<@NonNull GenericResponse<?>> activate(
             @RequestParam(required = true) UUID agentId
     ) {
         AgentModel agentEntity = this.agentService.activateAgentByAgentId(agentId);

@@ -1,6 +1,6 @@
 package com.dirmon.project.config.security;
 
-import com.dirmon.project.auth.service.TokenService;
+import com.dirmon.project.auth.service.JWTService;
 import com.dirmon.project.user.model.UserRole;
 import com.dirmon.project.util.ApplicationLogger;
 import io.jsonwebtoken.Claims;
@@ -24,14 +24,14 @@ import java.util.UUID;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final TokenService tokenService;
+    private final JWTService jwtService;
 
 
     @Autowired
     public JwtAuthenticationFilter(
-            TokenService tokenService
+            JWTService jwtService
     ) {
-        this.tokenService = tokenService;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Claims accessTokenClaims = this.tokenService.validateAccessToken(accessToken);
+            Claims accessTokenClaims = this.jwtService.validateAccessToken(accessToken);
 
             Boolean enabledClaim = accessTokenClaims.get("enabled", Boolean.class);
             boolean enabled = Boolean.TRUE.equals(enabledClaim);

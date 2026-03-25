@@ -14,8 +14,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "tokens")
-public class TokenModel {
+@Table(name = "refresh_tokens")
+public class RefreshTokenModel {
     @Builder.Default
     @Id
     @Column(name = "token_id", nullable = false, updatable = false)
@@ -55,8 +55,9 @@ public class TokenModel {
 
     @Override
     public String toString() {
-        return "TokenModel{" +
+        return "RefreshTokenModel{" +
                 "tokenId=" + tokenId +
+                ", user=" + user +
                 ", isRevoked=" + isRevoked +
                 ", signedAt=" + signedAt +
                 ", expiresAt=" + expiresAt +
