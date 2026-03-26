@@ -1,7 +1,7 @@
 package com.dirmon.project.scheduler;
 
 import com.dirmon.project.agent.repository.AgentRepository;
-import com.dirmon.project.util.ApplicationLogger;
+import com.dirmon.project.common.logging.ApplicationLogger;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

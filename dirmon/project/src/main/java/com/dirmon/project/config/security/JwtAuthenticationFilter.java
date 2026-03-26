@@ -2,7 +2,7 @@ package com.dirmon.project.config.security;
 
 import com.dirmon.project.auth.service.JWTService;
 import com.dirmon.project.user.model.UserRole;
-import com.dirmon.project.util.ApplicationLogger;
+import com.dirmon.project.common.logging.ApplicationLogger;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
