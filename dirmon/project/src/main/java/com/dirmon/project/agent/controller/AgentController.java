@@ -91,30 +91,35 @@ public class AgentController {
         );
     }
 
-    @PostMapping("/token")
+    @PostMapping("/activate/token")
     public ResponseEntity<@NonNull GenericResponse<?>> createAgentToken(
             @RequestParam(required = true) UUID agentId
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
         AgentModel agentEntity = this.agentService.fetchAgentByUserIdAndAgentId(userEntity.getUserId(), agentId);
 
-        String agentToken = this.agentTokenService.generateAgentToken(agentEntity);
+        String activationToken = this.agentTokenService.generateActivationToken(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
-                "Agent token was generated successfully",
-                agentToken
+                "Activation token was generated successfully",
+                activationToken
         );
     }
 
     @PostMapping("/activate")
     public ResponseEntity<@NonNull GenericResponse<?>> activate(
-            @RequestParam(required = true) UUID agentId
+            @RequestParam(required = true) String activationToken
     ) {
-        AgentModel agentEntity = this.agentService.activateAgentByAgentId(agentId);
+        AgentModel agentEntity = this.agentTokenService.extractAndVerifyToken(activationToken);
+        agentEntity = this.agentService.activateAgentByAgentId(agentEntity.getAgentId());
+
+        String heartbeatToken = this.agentTokenService.generateHeartbeatToken(agentEntity);
+
+        // TASKS, CONFIG and New Heartbeat TOKEN
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
-                "Agent status was updated successfully",
-                agentEntity
+                "Agent was activated successfully",
+                heartbeatToken
         );
     }
 

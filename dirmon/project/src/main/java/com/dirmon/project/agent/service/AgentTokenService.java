@@ -1,17 +1,13 @@
 package com.dirmon.project.agent.service;
 
 import com.dirmon.project.agent.model.AgentModel;
-import com.dirmon.project.common.exception.AgentTokenNotValidException;
-import io.jsonwebtoken.Claims;
+import com.dirmon.project.common.exception.AgentNotFoundException;
+import com.dirmon.project.common.exception.AgentTokenException;
 import lombok.NonNull;
 
-import java.time.Instant;
-
 public interface AgentTokenService {
-    String generateAgentToken(@NonNull AgentModel agentEntity);
-    Claims validateAgentToken(String agentToken) throws AgentTokenNotValidException;
+    String generateActivationToken(@NonNull AgentModel agentEntity);
+    String generateHeartbeatToken(@NonNull AgentModel agentEntity);
 
-    String extractId(String token) throws AgentTokenNotValidException;
-    String extractSubject(String token) throws AgentTokenNotValidException;
-    Instant extractExpiration(String token) throws AgentTokenNotValidException;
+    AgentModel extractAndVerifyToken(String token) throws AgentNotFoundException, AgentTokenException;
 }

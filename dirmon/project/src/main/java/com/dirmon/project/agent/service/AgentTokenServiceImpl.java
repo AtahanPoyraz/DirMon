@@ -2,20 +2,17 @@ package com.dirmon.project.agent.service;
 
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.repository.AgentRepository;
-import com.dirmon.project.common.exception.AgentTokenNotValidException;
-import com.dirmon.project.util.TimeProvider;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.dirmon.project.common.exception.AgentNotFoundException;
+import com.dirmon.project.common.exception.AgentTokenException;
+import com.dirmon.project.util.CryptoProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
@@ -24,10 +21,13 @@ public class AgentTokenServiceImpl implements AgentTokenService {
     @Value("${spring.security.token.agent.secret}")
     private String secret;
 
-    @Value("${spring.security.token.agent.expiration}")
-    private Long expire;
+    @Value("${spring.security.token.agent.activation.expiration}")
+    private Long activationExpire;
 
-    private SecretKey secretKey;
+    @Value("${spring.security.token.agent.heartbeat.expiration}")
+    private Long heartbeatExpire;
+
+    private SecretKeySpec secretKey;
 
     private final AgentRepository agentRepository;
 
@@ -40,87 +40,71 @@ public class AgentTokenServiceImpl implements AgentTokenService {
 
     @PostConstruct
     public void init() {
-        this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(this.secret));
+        byte[] keyBytes = Base64.getDecoder().decode(this.secret);
+        this.secretKey = new SecretKeySpec(keyBytes, "AES");
     }
 
-    private String createToken(
-            String tokenId,
-            String subject,
-            Map<String, Object> claims,
-            Date issuedAt,
-            Date expiration
-    ) {
-        return Jwts.builder()
-                .id(tokenId)
-                .subject(subject)
-                .claims(claims)
-                .issuedAt(issuedAt)
-                .expiration(expiration)
-                .signWith(this.secretKey)
-                .compact();
-    }
-
-    private Claims parseAndValidateToken(String token) {
+    private String generateToken(String subject, Instant issuedAt, Instant expireAt) throws AgentTokenException {
         try {
-            return Jwts.parser()
-                    .verifyWith(this.secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            String payload = subject + ":" + issuedAt.getEpochSecond() + ":" + expireAt.getEpochSecond();
+            byte[] encrypted = CryptoProvider.encrypt(payload.getBytes(StandardCharsets.UTF_8), secretKey);
 
-        } catch (ExpiredJwtException e) {
-            throw new AgentTokenNotValidException("Token expired");
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            throw new AgentTokenException(e.getMessage());
+        }
+    }
 
-        } catch (JwtException e) {
-            throw new AgentTokenNotValidException("Token invalid");
+    private String[] parseToken(String token) throws AgentTokenException {
+        try {
+            byte[] decoded = Base64.getDecoder().decode(token);
+            byte[] decrypted = CryptoProvider.decrypt(decoded, secretKey);
+            String payload = new String(decrypted, StandardCharsets.UTF_8);
+            return payload.split(":");
+        } catch (Exception e) {
+            throw new AgentTokenException(e.getMessage());
         }
     }
 
     @Override
-    public String generateAgentToken(@NonNull AgentModel agentEntity) {
-        UUID tokenId = UUID.randomUUID();
+    public String generateActivationToken(@NonNull AgentModel agentEntity) {
         UUID agentId = agentEntity.getAgentId();
 
         Instant issuedAt = Instant.now();
-        Instant expiration = issuedAt.plusMillis(this.expire);
+        Instant expireAt = issuedAt.plusMillis(this.activationExpire);
 
-        return this.createToken(
-                tokenId.toString(),
-                agentId.toString(),
-                Collections.emptyMap(),
-                TimeProvider.convertInstantToDate(issuedAt),
-                TimeProvider.convertInstantToDate(expiration)
-        );
+        return this.generateToken(agentId.toString(), issuedAt, expireAt);
     }
 
     @Override
-    public Claims validateAgentToken(String agentToken) throws AgentTokenNotValidException {
-        return this.parseAndValidateToken(agentToken);
+    public String generateHeartbeatToken(@NonNull AgentModel agentEntity) {
+        UUID agentId = agentEntity.getAgentId();
+
+        Instant issuedAt = Instant.now();
+        Instant expireAt = issuedAt.plusMillis(this.heartbeatExpire);
+
+        return this.generateToken(agentId.toString(), issuedAt, expireAt);
     }
 
     @Override
-    public String extractId(String token) throws AgentTokenNotValidException {
-        Claims tokenClaims = this.parseAndValidateToken(token);
-        if (tokenClaims.getId() == null) {
-            throw new AgentTokenNotValidException("Token not valid");
+    public AgentModel extractAndVerifyToken(String token) throws AgentNotFoundException, AgentTokenException {
+        String[] parts = parseToken(token);
+        if (parts.length != 3) {
+            throw new AgentTokenException("Invalid token format");
         }
 
-        return tokenClaims.getId();
-    }
-
-    @Override
-    public String extractSubject(String token) throws AgentTokenNotValidException {
-        Claims tokenClaims = this.parseAndValidateToken(token);
-        if (tokenClaims.getSubject() == null) {
-            throw new AgentTokenNotValidException("Token not valid");
+        Instant issuedAt = Instant.ofEpochSecond(Long.parseLong(parts[1]));
+        if (Instant.now().isBefore(issuedAt)) {
+            throw new AgentTokenException("Token not yet valid");
         }
 
-        return tokenClaims.getSubject();
-    }
+        Instant expireAt = Instant.ofEpochSecond(Long.parseLong(parts[2]));
+        if (Instant.now().isAfter(expireAt)) {
+            throw new AgentTokenException("Token expired");
+        }
 
-    @Override
-    public Instant extractExpiration(String token) throws AgentTokenNotValidException {
-        Claims tokenClaims = this.parseAndValidateToken(token);
-        return TimeProvider.convertDateToInstant(tokenClaims.getExpiration());
+        UUID agentId = UUID.fromString(parts[0]);
+        return this.agentRepository.findById(agentId)
+                .orElseThrow(() -> new AgentNotFoundException("Agent not found"));
     }
 }

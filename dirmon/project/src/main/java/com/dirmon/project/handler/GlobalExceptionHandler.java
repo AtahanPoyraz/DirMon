@@ -2,6 +2,10 @@ package com.dirmon.project.handler;
 
 import com.dirmon.project.common.dto.GenericResponse;
 import com.dirmon.project.common.exception.*;
+import com.dirmon.project.common.exception.AgentNotFoundException;
+import com.dirmon.project.common.exception.AgentTokenException;
+import com.dirmon.project.common.exception.EmailAlreadyExistException;
+import com.dirmon.project.common.exception.UserNotFoundException;
 import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -45,6 +49,28 @@ public class GlobalExceptionHandler {
     ) {
         return GenericResponse.genericResponse(
                 HttpStatus.NOT_FOUND,
+                e.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AgentNameAlreadyExistException.class)
+    public ResponseEntity<@NonNull GenericResponse<?>> handleAgentNameAlreadyExistException(
+            AgentNameAlreadyExistException e
+    ) {
+        return GenericResponse.genericResponse(
+                HttpStatus.CONFLICT,
+                e.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler(AgentTokenException.class)
+    public ResponseEntity<@NonNull GenericResponse<?>> handleAgentTokenException(
+            AgentTokenException e
+    ) {
+        return GenericResponse.genericResponse(
+                HttpStatus.BAD_REQUEST,
                 e.getMessage(),
                 null
         );
@@ -118,7 +144,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(JWTNotValidException.class)
-    public ResponseEntity<@NonNull GenericResponse<?>> handleTokenNotValidException(
+    public ResponseEntity<@NonNull GenericResponse<?>> handleJWTNotValidException(
             JWTNotValidException e
     ) {
         return GenericResponse.genericResponse(

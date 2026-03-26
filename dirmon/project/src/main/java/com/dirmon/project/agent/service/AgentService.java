@@ -3,13 +3,13 @@ package com.dirmon.project.agent.service;
 import com.dirmon.project.agent.dto.CreateAgentRequest;
 import com.dirmon.project.agent.dto.UpdateAgentRequest;
 import com.dirmon.project.agent.model.AgentModel;
-import com.dirmon.project.agent.model.AgentStatus;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface AgentService {
+    AgentModel fetchAgentByAgentId(UUID agentId);
     List<AgentModel> fetchAllAgentsByUserId(UUID userId);
     AgentModel fetchAgentByUserIdAndAgentId(UUID userId, UUID agentId);
 

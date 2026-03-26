@@ -54,14 +54,14 @@ public class JWTServiceImpl implements JWTService {
             String subject,
             Map<String, Object> claims,
             Date issuedAt,
-            Date expiration
+            Date expireAt
     ) {
         return Jwts.builder()
                 .id(tokenId)
                 .subject(subject)
                 .claims(claims)
                 .issuedAt(issuedAt)
-                .expiration(expiration)
+                .expiration(expireAt)
                 .signWith(this.secretKey)
                 .compact();
     }

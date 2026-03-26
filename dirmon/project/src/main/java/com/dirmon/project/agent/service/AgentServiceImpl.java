@@ -5,6 +5,7 @@ import com.dirmon.project.agent.dto.UpdateAgentRequest;
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.model.AgentStatus;
 import com.dirmon.project.agent.repository.AgentRepository;
+import com.dirmon.project.common.exception.AgentNameAlreadyExistException;
 import com.dirmon.project.common.exception.AgentNotFoundException;
 import com.dirmon.project.common.exception.UserNotFoundException;
 import com.dirmon.project.user.model.UserModel;
@@ -33,6 +34,12 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
+    public AgentModel fetchAgentByAgentId(UUID agentId) {
+        return this.agentRepository.findById(agentId)
+                .orElseThrow(() -> new AgentNotFoundException("Agent not found with id " + agentId));
+    }
+
+    @Override
     public List<AgentModel> fetchAllAgentsByUserId(UUID userId) {
         return this.agentRepository.findAllByUser_UserId(userId);
     }
@@ -48,6 +55,10 @@ public class AgentServiceImpl implements AgentService {
     public AgentModel createAgentByUserIdAndAgentId(UUID userId, CreateAgentRequest createAgentRequest) {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        if (this.agentRepository.findByName(createAgentRequest.getName()).isPresent()) {
+            throw new AgentNameAlreadyExistException("Agent already exists with name '" + createAgentRequest.getName());
+        }
 
         AgentModel agentModel = AgentModel.builder()
                 .name(createAgentRequest.getName())

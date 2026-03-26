@@ -18,6 +18,9 @@ public interface AgentRepository extends JpaRepository<@NonNull AgentModel, @Non
     @NonNull
     List<AgentModel> findAllByUser_UserId(UUID userId);
 
+    @NonNull
+    Optional<AgentModel> findByName(String name);
+
     @Query("SELECT a FROM AgentModel a WHERE a.user.userId = :userId AND a.agentId = :agentId")
     Optional<AgentModel> findByUserIdAndAgentId(@Param("userId") UUID userId, @Param("agentId") UUID agentId);
 
@@ -31,7 +34,7 @@ public interface AgentRepository extends JpaRepository<@NonNull AgentModel, @Non
 
     @Modifying
     @Query("DELETE FROM AgentModel a WHERE a.user.userId = :userId")
-    int deleteAgentsByUserId(@Param("userId") UUID userId);
+    void deleteAgentsByUserId(@Param("userId") UUID userId);
 
     List<AgentModel> findAllByUser_UserIdAndAgentIdIn(UUID userId, List<UUID> agentIds);
 }
