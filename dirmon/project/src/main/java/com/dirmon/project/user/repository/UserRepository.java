@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<@NonNull UserModel, @NonNu
     @Modifying
     @Query("UPDATE UserModel u SET u.lastLogin = :lastLogin WHERE u.userId = :userId")
     void updateLastLogin(@Param("userId") UUID userId, @Param("lastLogin") Instant lastLogin);
+
+    int deleteByEnabledFalseAndLastLoginBefore(Instant thresholdTime);
 }

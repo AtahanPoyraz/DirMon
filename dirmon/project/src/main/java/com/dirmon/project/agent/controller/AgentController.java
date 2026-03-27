@@ -108,9 +108,9 @@ public class AgentController {
 
     @PostMapping("/activate")
     public ResponseEntity<@NonNull GenericResponse<?>> activate(
-            @RequestParam(required = true) String activationToken
+            @RequestParam(required = true) String token
     ) {
-        AgentModel agentEntity = this.agentTokenService.extractAndVerifyToken(activationToken);
+        AgentModel agentEntity = this.agentTokenService.extractAndVerifyToken(token);
         agentEntity = this.agentService.activateAgentByAgentId(agentEntity.getAgentId());
 
         String heartbeatToken = this.agentTokenService.generateHeartbeatToken(agentEntity);
