@@ -1,11 +1,14 @@
 package com.dirmon.project.handler;
 
+import com.dirmon.project.agent.exception.AgentNameAlreadyExistException;
+import com.dirmon.project.auth.exception.AuthenticationException;
+import com.dirmon.project.auth.exception.CookieNotFoundException;
+import com.dirmon.project.auth.exception.JWTNotValidException;
 import com.dirmon.project.common.dto.GenericResponse;
-import com.dirmon.project.common.exception.*;
-import com.dirmon.project.common.exception.AgentNotFoundException;
-import com.dirmon.project.common.exception.AgentTokenException;
-import com.dirmon.project.common.exception.EmailAlreadyExistException;
-import com.dirmon.project.common.exception.UserNotFoundException;
+import com.dirmon.project.agent.exception.AgentNotFoundException;
+import com.dirmon.project.agent.exception.AgentTokenException;
+import com.dirmon.project.user.exception.EmailAlreadyExistException;
+import com.dirmon.project.user.exception.UserNotFoundException;
 import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

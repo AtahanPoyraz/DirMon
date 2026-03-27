@@ -5,7 +5,7 @@ import com.dirmon.project.auth.dto.SignUpRequest;
 import com.dirmon.project.auth.service.AuthService;
 import com.dirmon.project.auth.service.JWTService;
 import com.dirmon.project.common.dto.GenericResponse;
-import com.dirmon.project.common.exception.CookieNotFoundException;
+import com.dirmon.project.auth.exception.CookieNotFoundException;
 import com.dirmon.project.user.model.UserModel;
 import com.dirmon.project.user.service.UserService;
 import com.dirmon.project.util.TimeProvider;

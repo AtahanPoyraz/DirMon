@@ -1,6 +1,6 @@
 package com.dirmon.project.user.service;
 
-import com.dirmon.project.common.exception.UserNotFoundException;
+import com.dirmon.project.user.exception.UserNotFoundException;
 import com.dirmon.project.user.dto.UpdateDetailsRequest;
 import com.dirmon.project.user.dto.UpdatePasswordRequest;
 import com.dirmon.project.user.model.UserModel;

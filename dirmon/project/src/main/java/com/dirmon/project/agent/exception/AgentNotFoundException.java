@@ -1,4 +1,4 @@
-package com.dirmon.project.common.exception;
+package com.dirmon.project.agent.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.NonNull;

@@ -1,4 +1,4 @@
-package com.dirmon.project.common.exception;
+package com.dirmon.project.agent.exception;
 
 public class AgentNameAlreadyExistException extends IllegalStateException {
     public AgentNameAlreadyExistException(String message) {

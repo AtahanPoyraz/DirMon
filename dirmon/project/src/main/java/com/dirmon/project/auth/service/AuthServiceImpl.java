@@ -2,7 +2,7 @@ package com.dirmon.project.auth.service;
 
 import com.dirmon.project.auth.dto.SignInRequest;
 import com.dirmon.project.auth.dto.SignUpRequest;
-import com.dirmon.project.common.exception.EmailAlreadyExistException;
+import com.dirmon.project.user.exception.EmailAlreadyExistException;
 import com.dirmon.project.user.model.UserModel;
 import com.dirmon.project.user.model.UserRole;
 import com.dirmon.project.user.repository.UserRepository;

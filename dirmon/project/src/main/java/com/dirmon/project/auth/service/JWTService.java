@@ -1,6 +1,6 @@
 package com.dirmon.project.auth.service;
 
-import com.dirmon.project.common.exception.JWTNotValidException;
+import com.dirmon.project.auth.exception.JWTNotValidException;
 import com.dirmon.project.user.model.UserModel;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;

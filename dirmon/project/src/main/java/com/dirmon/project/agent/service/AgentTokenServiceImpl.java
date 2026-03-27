@@ -2,8 +2,8 @@ package com.dirmon.project.agent.service;
 
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.repository.AgentRepository;
-import com.dirmon.project.common.exception.AgentNotFoundException;
-import com.dirmon.project.common.exception.AgentTokenException;
+import com.dirmon.project.agent.exception.AgentNotFoundException;
+import com.dirmon.project.agent.exception.AgentTokenException;
 import com.dirmon.project.util.CryptoProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;

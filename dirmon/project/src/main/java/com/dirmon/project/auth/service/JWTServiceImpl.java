@@ -2,7 +2,7 @@ package com.dirmon.project.auth.service;
 
 import com.dirmon.project.auth.model.RefreshTokenModel;
 import com.dirmon.project.auth.repository.RefreshTokenRepository;
-import com.dirmon.project.common.exception.JWTNotValidException;
+import com.dirmon.project.auth.exception.JWTNotValidException;
 import com.dirmon.project.user.model.UserModel;
 import com.dirmon.project.util.TimeProvider;
 import io.jsonwebtoken.Claims;

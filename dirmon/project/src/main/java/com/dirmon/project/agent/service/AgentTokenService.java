@@ -1,8 +1,8 @@
 package com.dirmon.project.agent.service;
 
 import com.dirmon.project.agent.model.AgentModel;
-import com.dirmon.project.common.exception.AgentNotFoundException;
-import com.dirmon.project.common.exception.AgentTokenException;
+import com.dirmon.project.agent.exception.AgentNotFoundException;
+import com.dirmon.project.agent.exception.AgentTokenException;
 import lombok.NonNull;
 
 public interface AgentTokenService {

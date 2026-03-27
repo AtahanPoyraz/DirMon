@@ -1,4 +1,4 @@
-package com.dirmon.project.common.exception;
+package com.dirmon.project.auth.exception;
 
 public class JWTNotValidException extends RuntimeException {
     public JWTNotValidException(String message) {

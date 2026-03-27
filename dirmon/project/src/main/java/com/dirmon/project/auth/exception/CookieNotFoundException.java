@@ -1,4 +1,4 @@
-package com.dirmon.project.common.exception;
+package com.dirmon.project.auth.exception;
 
 import lombok.NonNull;
 import org.springframework.security.authentication.BadCredentialsException;
