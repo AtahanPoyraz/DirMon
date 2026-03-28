@@ -1,5 +1,6 @@
 package com.dirmon.project.agent.service;
 
+import com.dirmon.project.agent.exception.AgentTokenNotValidException;
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.repository.AgentRepository;
 import com.dirmon.project.agent.exception.AgentNotFoundException;
@@ -44,7 +45,7 @@ public class AgentTokenServiceImpl implements AgentTokenService {
         this.secretKey = new SecretKeySpec(keyBytes, "AES");
     }
 
-    private String generateToken(String subject, Instant issuedAt, Instant expireAt) throws AgentTokenException {
+    private String generateToken(String subject, Instant issuedAt, Instant expireAt) {
         try {
             String payload = subject + ":" + issuedAt.getEpochSecond() + ":" + expireAt.getEpochSecond();
             byte[] encrypted = CryptoProvider.encrypt(payload.getBytes(StandardCharsets.UTF_8), secretKey);
@@ -55,7 +56,7 @@ public class AgentTokenServiceImpl implements AgentTokenService {
         }
     }
 
-    private String[] parseToken(String token) throws AgentTokenException {
+    private String[] parseToken(String token) {
         try {
             byte[] decoded = Base64.getDecoder().decode(token);
             byte[] decrypted = CryptoProvider.decrypt(decoded, secretKey);
@@ -87,20 +88,20 @@ public class AgentTokenServiceImpl implements AgentTokenService {
     }
 
     @Override
-    public AgentModel extractAndVerifyToken(String token) throws AgentNotFoundException, AgentTokenException {
+    public AgentModel extractAndVerifyToken(String token) {
         String[] parts = parseToken(token);
         if (parts.length != 3) {
-            throw new AgentTokenException("Invalid token format");
+            throw new AgentTokenNotValidException("Invalid token format");
         }
 
         Instant issuedAt = Instant.ofEpochSecond(Long.parseLong(parts[1]));
         if (Instant.now().isBefore(issuedAt)) {
-            throw new AgentTokenException("Token not yet valid");
+            throw new AgentTokenNotValidException("Token not yet valid");
         }
 
         Instant expireAt = Instant.ofEpochSecond(Long.parseLong(parts[2]));
         if (Instant.now().isAfter(expireAt)) {
-            throw new AgentTokenException("Token expired");
+            throw new AgentTokenNotValidException("Token expired");
         }
 
         UUID agentId = UUID.fromString(parts[0]);
