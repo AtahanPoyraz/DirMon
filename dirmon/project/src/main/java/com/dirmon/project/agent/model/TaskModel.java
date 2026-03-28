@@ -2,6 +2,7 @@ package com.dirmon.project.agent.model;
 
 import com.dirmon.project.user.model.UserModel;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,24 +18,29 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(
-        name = "agents",
+        name = "tasks",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uq_user_agent_name",
-                        columnNames = {"user_id", "name"}
+                        name = "uq_agent_task_name",
+                        columnNames = {"agent_id", "name"}
                 )
         }
 )
-public class AgentModel {
+public class TaskModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "agent_id", unique = true, nullable = false, updatable = false)
-    private UUID agentId;
+    @Column(name = "task_id", unique = true, nullable = false, updatable = false)
+    private UUID taskId;
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_agent_id", nullable = true)
+    private AgentModel assignedAgent;
 
     @Column(name = "name", unique = false, nullable = false, updatable = true)
     private String name;
@@ -44,11 +50,16 @@ public class AgentModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", unique = false, nullable = false, updatable = true)
-    private AgentStatus status;
+    private TaskStatus status;
 
-    @JsonBackReference
-    @OneToOne(mappedBy = "assignedAgent")
-    private TaskModel task;
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "task",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<DirectoryModel> directories = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

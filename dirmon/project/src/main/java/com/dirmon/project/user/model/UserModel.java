@@ -1,6 +1,7 @@
 package com.dirmon.project.user.model;
 
 import com.dirmon.project.agent.model.AgentModel;
+import com.dirmon.project.agent.model.TaskModel;
 import com.dirmon.project.auth.model.RefreshTokenModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -87,6 +88,16 @@ public class UserModel implements UserDetails {
             orphanRemoval = true
     )
     private List<AgentModel> agents = new ArrayList<>();
+
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(
+            mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TaskModel> tasks = new ArrayList<>();
 
     @JsonIgnore
     @Override

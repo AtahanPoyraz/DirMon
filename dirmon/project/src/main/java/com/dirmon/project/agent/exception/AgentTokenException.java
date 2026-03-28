@@ -1,6 +1,8 @@
 package com.dirmon.project.agent.exception;
 
-public class AgentTokenException extends RuntimeException {
+import jakarta.persistence.EntityNotFoundException;
+
+public class AgentTokenException extends EntityNotFoundException {
     public AgentTokenException(String message) {
         super(message);
     }
