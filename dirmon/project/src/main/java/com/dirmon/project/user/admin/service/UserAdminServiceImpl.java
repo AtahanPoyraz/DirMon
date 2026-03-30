@@ -1,7 +1,7 @@
-package com.dirmon.project.admin.service;
+package com.dirmon.project.user.admin.service;
 
-import com.dirmon.project.admin.dto.user.CreateUserRequest;
-import com.dirmon.project.admin.dto.user.UpdateUserRequest;
+import com.dirmon.project.user.admin.dto.CreateUserRequest;
+import com.dirmon.project.user.admin.dto.UpdateUserRequest;
 import com.dirmon.project.user.exception.EmailAlreadyExistException;
 import com.dirmon.project.user.exception.UserNotFoundException;
 import com.dirmon.project.user.model.UserModel;

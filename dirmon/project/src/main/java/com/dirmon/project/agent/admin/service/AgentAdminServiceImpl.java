@@ -1,7 +1,7 @@
-package com.dirmon.project.admin.service;
+package com.dirmon.project.agent.admin.service;
 
-import com.dirmon.project.admin.dto.agent.CreateAgentRequest;
-import com.dirmon.project.admin.dto.agent.UpdateAgentRequest;
+import com.dirmon.project.agent.admin.dto.CreateAgentRequest;
+import com.dirmon.project.agent.admin.dto.UpdateAgentRequest;
 import com.dirmon.project.agent.exception.AgentNotFoundException;
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.model.AgentStatus;

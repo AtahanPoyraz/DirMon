@@ -1,13 +1,10 @@
 package com.dirmon.project.agent.model;
 
 import com.dirmon.project.user.model.UserModel;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -31,7 +28,6 @@ public class AgentModel {
     @Column(name = "agent_id", unique = true, nullable = false, updatable = false)
     private UUID agentId;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
@@ -46,7 +42,6 @@ public class AgentModel {
     @Column(name = "status", unique = false, nullable = false, updatable = true)
     private AgentStatus status;
 
-    @JsonBackReference
     @OneToOne(mappedBy = "assignedAgent")
     private TaskModel task;
 

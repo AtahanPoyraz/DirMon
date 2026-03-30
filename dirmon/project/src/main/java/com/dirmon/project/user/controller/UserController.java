@@ -37,17 +37,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<@NonNull GenericResponse<?>> fetchUser() {
         UserModel userEntity = this.getUserFromSecurityContext();
-
-        UserResponse userResponse = UserResponse.builder()
-                .userId(userEntity.getUserId())
-                .firstName(userEntity.getFirstName())
-                .lastName(userEntity.getLastName())
-                .email(userEntity.getEmail())
-                .roles(EnumSet.copyOf(userEntity.getRoles()))
-                .lastLogin(userEntity.getLastLogin())
-                .createdAt(userEntity.getUpdatedAt())
-                .build();
-
+        UserResponse userResponse = convertEntityToDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User was fetched successfully",
@@ -61,10 +51,12 @@ public class UserController {
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.updateDetailsByUserId(userEntity.getUserId(), updateDetailsRequest);
+
+        UserResponse userResponse = convertEntityToDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User details were updated successfully",
-                userEntity
+                userResponse
         );
     }
 
@@ -74,10 +66,12 @@ public class UserController {
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.updatePasswordByUserId(userEntity.getUserId(), updatePasswordRequest);
+
+        UserResponse userResponse = convertEntityToDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User password was updated successfully",
-                userEntity
+                userResponse
         );
     }
 
@@ -85,10 +79,12 @@ public class UserController {
     public ResponseEntity<@NonNull GenericResponse<?>> deActivateUser() {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.deActivateUserByUserId(userEntity.getUserId());
+
+        UserResponse userResponse = convertEntityToDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User deactivated was updated successfully",
-                userEntity
+                userResponse
         );
     }
 
@@ -114,5 +110,17 @@ public class UserController {
         }
 
         return this.userService.fetchUserByUserId(userId);
+    }
+
+    private static UserResponse convertEntityToDto(UserModel userEntity) {
+        return UserResponse.builder()
+                .userId(userEntity.getUserId())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .email(userEntity.getEmail())
+                .roles(EnumSet.copyOf(userEntity.getRoles()))
+                .lastLogin(userEntity.getLastLogin())
+                .createdAt(userEntity.getUpdatedAt())
+                .build();
     }
 }

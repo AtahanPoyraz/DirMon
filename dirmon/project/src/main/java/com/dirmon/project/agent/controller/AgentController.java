@@ -1,5 +1,6 @@
 package com.dirmon.project.agent.controller;
 
+import com.dirmon.project.agent.dto.AgentResponse;
 import com.dirmon.project.agent.dto.CreateAgentRequest;
 import com.dirmon.project.agent.dto.UpdateAgentRequest;
 import com.dirmon.project.agent.model.AgentModel;
@@ -49,18 +50,20 @@ public class AgentController {
         UserModel userEntity = this.getUserFromSecurityContext();
         if (agentId != null) {
             AgentModel agentEntity = this.agentService.fetchAgentByUserIdAndAgentId(userEntity.getUserId(), agentId);
+            AgentResponse agentResponse = convertEntityToDto(agentEntity);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "Agent was fetched successfully",
-                    agentEntity
+                    agentResponse
             );
         }
 
         List<AgentModel> agentEntities = this.agentService.fetchAllAgentsByUserId(userEntity.getUserId());
+        List<AgentResponse> agentResponses = agentEntities.stream().map(AgentController::convertEntityToDto).toList();
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agents were fetched successfully",
-                agentEntities
+                agentResponses
         );
     }
 
@@ -70,10 +73,12 @@ public class AgentController {
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
         AgentModel agentEntity = this.agentService.createAgentByUserIdAndAgentId(userEntity.getUserId(), createAgentRequest);
+
+        AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agent was created successfully",
-                agentEntity
+                agentResponse
         );
     }
 
@@ -84,14 +89,16 @@ public class AgentController {
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
         AgentModel agentEntity = this.agentService.updateAgentDetailsByUserIdAndAgentId(userEntity.getUserId(), agentId, updateAgentRequest);
+
+        AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agent details was updated successfully",
-                agentEntity
+                agentResponse
         );
     }
 
-    @PostMapping("/activate/token")
+    @PostMapping("/activation-token")
     public ResponseEntity<@NonNull GenericResponse<?>> createAgentToken(
             @RequestParam(required = true) UUID agentId
     ) {
@@ -175,5 +182,16 @@ public class AgentController {
         }
 
         return this.userService.fetchUserByUserId(userId);
+    }
+
+    private static AgentResponse convertEntityToDto(AgentModel agentEntity) {
+        return AgentResponse.builder()
+                .agentId(agentEntity.getAgentId())
+                .name(agentEntity.getName())
+                .description(agentEntity.getDescription())
+                .status(agentEntity.getStatus())
+                .createdAt(agentEntity.getCreatedAt())
+                .updatedAt(agentEntity.getUpdatedAt())
+                .build();
     }
 }

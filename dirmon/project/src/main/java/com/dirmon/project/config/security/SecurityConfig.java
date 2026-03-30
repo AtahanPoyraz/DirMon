@@ -103,14 +103,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                                 .requestMatchers(
+                                        "/api/v1/user/admin/**",
+                                        "/api/v1/agent/admin/**"
+                                )
+                                .hasAnyRole("ADMIN")
+                                .requestMatchers(
                                         "/api/v1/user/**",
                                         "/api/v1/agent/**"
                                 )
                                 .hasAnyRole("ADMIN", "USER")
-                                .requestMatchers(
-                                        "/api/v1/admin/**"
-                                )
-                                .hasRole("ADMIN")
                                 .anyRequest()
                                 .denyAll()
                 )

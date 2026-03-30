@@ -1,4 +1,4 @@
-package com.dirmon.project.scheduler;
+package com.dirmon.project.user.scheduler;
 
 import com.dirmon.project.common.logging.ApplicationLogger;
 import com.dirmon.project.user.repository.UserRepository;

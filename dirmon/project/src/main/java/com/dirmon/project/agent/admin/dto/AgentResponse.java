@@ -1,8 +1,9 @@
-package com.dirmon.project.admin.dto.agent;
+package com.dirmon.project.agent.admin.dto;
 
 import com.dirmon.project.agent.model.AgentStatus;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -10,12 +11,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateAgentRequest {
-    private String name;
-
-    private String description;
-
-    private AgentStatus status;
-
+public class AgentResponse {
+    private UUID agentId;
     private UUID userId;
+    private String name;
+    private String description;
+    private AgentStatus status;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

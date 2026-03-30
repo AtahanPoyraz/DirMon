@@ -21,7 +21,6 @@ public class RefreshTokenModel {
     @Column(name = "token_id", nullable = false, updatable = false)
     private UUID tokenId = UUID.randomUUID();
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = false, nullable = false, updatable = false)
     private UserModel user;

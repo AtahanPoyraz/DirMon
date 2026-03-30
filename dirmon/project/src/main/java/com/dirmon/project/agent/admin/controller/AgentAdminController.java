@@ -1,11 +1,11 @@
-package com.dirmon.project.admin.controller;
+package com.dirmon.project.agent.admin.controller;
 
-import com.dirmon.project.admin.dto.agent.CreateAgentRequest;
-import com.dirmon.project.admin.dto.agent.UpdateAgentRequest;
-import com.dirmon.project.admin.service.AgentAdminService;
+import com.dirmon.project.agent.admin.dto.AgentResponse;
+import com.dirmon.project.agent.admin.dto.CreateAgentRequest;
+import com.dirmon.project.agent.admin.dto.UpdateAgentRequest;
+import com.dirmon.project.agent.admin.service.AgentAdminService;
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.common.dto.GenericResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springdoc.core.annotations.ParameterObject;
@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "admin-controller")
 @RestController
-@RequestMapping("/api/v1/admin/agent")
+@RequestMapping("/api/v1/agent/admin")
 public class AgentAdminController {
     private final AgentAdminService agentAdminService;
 
@@ -40,36 +39,40 @@ public class AgentAdminController {
     ) {
         if (userId != null && agentId != null) {
             AgentModel agentEntity = this.agentAdminService.fetchAgentByUserIdAndAgentId(userId, agentId);
+            AgentResponse agentResponse = convertEntityToDto(agentEntity);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "Agent was fetched successfully",
-                    agentEntity
+                    agentResponse
             );
         }
 
         if (agentId != null) {
             AgentModel agentEntity = this.agentAdminService.fetchAgentById(agentId);
+            AgentResponse agentResponse = convertEntityToDto(agentEntity);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "Agent was fetched successfully",
-                    agentEntity
+                    agentResponse
             );
         }
 
         if (userId != null) {
             List<AgentModel> agentEntity = this.agentAdminService.fetchAgentsByUserId(userId);
+            List<AgentResponse> agentResponses = agentEntity.stream().map(AgentAdminController::convertEntityToDto).toList();
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "Agents were fetched successfully",
-                    agentEntity
+                    agentResponses
             );
         }
 
         Page<@NonNull AgentModel> agentEntities = this.agentAdminService.fetchAgents(pageable);
+        Page<@NonNull AgentResponse> agentResponses = agentEntities.map(AgentAdminController::convertEntityToDto);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agents were fetched successfully",
-                agentEntities
+                agentResponses
         );
     }
 
@@ -78,10 +81,11 @@ public class AgentAdminController {
             @Valid @RequestBody CreateAgentRequest createAgentRequest
     ) {
         AgentModel agentEntity = this.agentAdminService.createAgent(createAgentRequest);
+        AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.CREATED,
                 "Agent was created successfully",
-                agentEntity
+                agentResponse
         );
     }
 
@@ -91,10 +95,11 @@ public class AgentAdminController {
             @Valid @RequestBody UpdateAgentRequest updateAgentRequest
     ) {
         AgentModel agentEntity = this.agentAdminService.updateAgentByAgentId(agentId, updateAgentRequest);
+        AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agent was updated successfully",
-                agentEntity
+                agentResponse
         );
     }
 
@@ -143,5 +148,17 @@ public class AgentAdminController {
                 "Agents were deleted successfully",
                 null
         );
+    }
+
+    private static AgentResponse convertEntityToDto(AgentModel agentEntity) {
+        return AgentResponse.builder()
+                .agentId(agentEntity.getAgentId())
+                .userId(agentEntity.getUser().getUserId())
+                .name(agentEntity.getName())
+                .description(agentEntity.getDescription())
+                .status(agentEntity.getStatus())
+                .createdAt(agentEntity.getCreatedAt())
+                .updatedAt(agentEntity.getUpdatedAt())
+                .build();
     }
 }

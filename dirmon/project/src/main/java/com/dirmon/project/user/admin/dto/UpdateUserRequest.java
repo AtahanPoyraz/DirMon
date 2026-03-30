@@ -1,4 +1,4 @@
-package com.dirmon.project.admin.dto.user;
+package com.dirmon.project.user.admin.dto;
 
 import com.dirmon.project.user.model.UserRole;
 import jakarta.validation.constraints.Email;

@@ -1,4 +1,4 @@
-package com.dirmon.project.scheduler;
+package com.dirmon.project.agent.scheduler;
 
 import com.dirmon.project.agent.repository.AgentRepository;
 import com.dirmon.project.common.logging.ApplicationLogger;

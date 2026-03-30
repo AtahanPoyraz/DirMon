@@ -1,4 +1,4 @@
-package com.dirmon.project.admin.dto.agent;
+package com.dirmon.project.agent.admin.dto;
 
 import com.dirmon.project.agent.model.AgentStatus;
 import jakarta.validation.constraints.NotBlank;

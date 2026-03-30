@@ -3,7 +3,6 @@ package com.dirmon.project.user.model;
 import com.dirmon.project.agent.model.AgentModel;
 import com.dirmon.project.agent.model.TaskModel;
 import com.dirmon.project.auth.model.RefreshTokenModel;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -70,7 +69,6 @@ public class UserModel implements UserDetails {
     private Instant updatedAt;
 
     @Builder.Default
-    @JsonIgnore
     @OneToMany(
             mappedBy = "user",
             fetch = FetchType.LAZY,
@@ -80,7 +78,6 @@ public class UserModel implements UserDetails {
     private List<RefreshTokenModel> refreshTokens = new ArrayList<>();
 
     @Builder.Default
-    @JsonIgnore
     @OneToMany(
             mappedBy = "user",
             fetch = FetchType.LAZY,
@@ -90,7 +87,6 @@ public class UserModel implements UserDetails {
     private List<AgentModel> agents = new ArrayList<>();
 
     @Builder.Default
-    @JsonIgnore
     @OneToMany(
             mappedBy = "user",
             fetch = FetchType.LAZY,
@@ -99,14 +95,12 @@ public class UserModel implements UserDetails {
     )
     private List<TaskModel> tasks = new ArrayList<>();
 
-    @JsonIgnore
     @Override
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles;
     }
 
-    @JsonIgnore
     @Override
     @NonNull
     public String getUsername() {
