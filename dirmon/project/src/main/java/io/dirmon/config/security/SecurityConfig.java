@@ -111,7 +111,7 @@ public class SecurityConfig {
                                         "/api/v1/user/**",
                                         "/api/v1/agent/**"
                                 )
-                                .hasAnyRole("ADMIN", "USER")
+                                .hasAnyRole("ADMIN", "STAFF", "USER")
                                 .anyRequest()
                                 .denyAll()
                 )
