@@ -1,7 +1,9 @@
 package io.dirmon.agent.service;
 
 import io.dirmon.agent.dto.CreateAgentRequest;
-import io.dirmon.agent.dto.UpdateAgentRequest;
+import io.dirmon.agent.dto.UpdateAgentConfigRequest;
+import io.dirmon.agent.dto.UpdateAgentDetailsRequest;
+import io.dirmon.agent.model.AgentConfig;
 import io.dirmon.agent.model.AgentModel;
 import io.dirmon.agent.model.AgentStatus;
 import io.dirmon.agent.repository.AgentRepository;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,17 +55,18 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     @Transactional
-    public AgentModel createAgentByUserIdAndAgentId(UUID userId, CreateAgentRequest createAgentRequest) {
+    public AgentModel createAgentByUserId(UUID userId, CreateAgentRequest createAgentRequest) {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
-        if (this.agentRepository.findByName(createAgentRequest.getName()).isPresent()) {
+        if (this.agentRepository.findByNameAndUser_UserId(createAgentRequest.getName(), userId).isPresent()) {
             throw new AgentNameAlreadyExistException("Agent already exists with name '" + createAgentRequest.getName());
         }
 
         AgentModel agentModel = AgentModel.builder()
                 .name(createAgentRequest.getName())
                 .description(createAgentRequest.getDescription())
+                //.config(createAgentRequest.getConfig())
                 .status(AgentStatus.STATUS_INACTIVE)
                 .user(userEntity)
                 .build();
@@ -72,17 +76,29 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     @Transactional
-    public AgentModel updateAgentDetailsByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentRequest updateAgentRequest) {
+    public AgentModel updateAgentDetailsByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentDetailsRequest updateAgentDetailsRequest) {
         AgentModel agentEntity = this.agentRepository.findByUserIdAndAgentId(userId, agentId)
                 .orElseThrow(() -> new AgentNotFoundException("Agent not found with id: " + agentId + " and userId: " + userId));
 
-        if (updateAgentRequest.getName() != null && !updateAgentRequest.getName().isEmpty()) {
-            agentEntity.setName(updateAgentRequest.getName());
+        if (updateAgentDetailsRequest.getName() != null && !updateAgentDetailsRequest.getName().isEmpty()) {
+            agentEntity.setName(updateAgentDetailsRequest.getName());
         }
 
-        if (updateAgentRequest.getDescription() != null && !updateAgentRequest.getDescription().isEmpty()) {
-            agentEntity.setDescription(updateAgentRequest.getDescription());
+        if (updateAgentDetailsRequest.getDescription() != null) {
+            agentEntity.setDescription(updateAgentDetailsRequest.getDescription());
         }
+
+        return this.agentRepository.save(agentEntity);
+    }
+
+    @Override
+    @Transactional
+    public AgentModel updateAgentConfigByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentConfigRequest updateAgentConfigRequest) {
+        AgentModel agentEntity = this.agentRepository.findByUserIdAndAgentId(userId, agentId)
+                .orElseThrow(() -> new AgentNotFoundException("Agent not found with id: " + agentId + " and userId: " + userId));
+
+        Optional.ofNullable(updateAgentConfigRequest.getHeartbeatIntervalSeconds())
+                .ifPresent(agentEntity.getConfig()::setHeartbeatIntervalSeconds);
 
         return this.agentRepository.save(agentEntity);
     }

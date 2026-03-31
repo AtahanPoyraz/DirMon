@@ -3,6 +3,8 @@ package io.dirmon.agent.model;
 import io.dirmon.user.model.UserModel;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -38,9 +40,15 @@ public class AgentModel {
     @Column(name = "description", unique = false, nullable = true, updatable = true, columnDefinition = "TEXT")
     private String description;
 
+    @Builder.Default
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "config", unique = false, nullable = false, updatable = true, columnDefinition = "jsonb")
+    private AgentConfig config = new AgentConfig();
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", unique = false, nullable = false, updatable = true)
-    private AgentStatus status;
+    private AgentStatus status = AgentStatus.STATUS_INACTIVE;
 
     @OneToOne(mappedBy = "assignedAgent")
     private TaskModel task;

@@ -2,7 +2,8 @@ package io.dirmon.agent.controller;
 
 import io.dirmon.agent.dto.AgentResponse;
 import io.dirmon.agent.dto.CreateAgentRequest;
-import io.dirmon.agent.dto.UpdateAgentRequest;
+import io.dirmon.agent.dto.UpdateAgentConfigRequest;
+import io.dirmon.agent.dto.UpdateAgentDetailsRequest;
 import io.dirmon.agent.model.AgentModel;
 import io.dirmon.agent.service.AgentService;
 import io.dirmon.agent.service.AgentTokenService;
@@ -59,11 +60,11 @@ public class AgentController {
         }
 
         List<AgentModel> agentEntities = this.agentService.fetchAllAgentsByUserId(userEntity.getUserId());
-        List<AgentResponse> agentResponses = agentEntities.stream().map(AgentController::convertEntityToDto).toList();
+        List<AgentResponse> agentRespons = agentEntities.stream().map(AgentController::convertEntityToDto).toList();
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agents were fetched successfully",
-                agentResponses
+                agentRespons
         );
     }
 
@@ -72,7 +73,7 @@ public class AgentController {
             @Valid @RequestBody CreateAgentRequest createAgentRequest
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
-        AgentModel agentEntity = this.agentService.createAgentByUserIdAndAgentId(userEntity.getUserId(), createAgentRequest);
+        AgentModel agentEntity = this.agentService.createAgentByUserId(userEntity.getUserId(), createAgentRequest);
 
         AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
@@ -83,17 +84,33 @@ public class AgentController {
     }
 
     @PatchMapping("/details")
-    public ResponseEntity<@NonNull GenericResponse<?>> updateAgent(
+    public ResponseEntity<@NonNull GenericResponse<?>> updateAgentDetails(
             @RequestParam(required = true) UUID agentId,
-            @Valid @RequestBody UpdateAgentRequest updateAgentRequest
+            @Valid @RequestBody UpdateAgentDetailsRequest updateAgentDetailsRequest
     ) {
         UserModel userEntity = this.getUserFromSecurityContext();
-        AgentModel agentEntity = this.agentService.updateAgentDetailsByUserIdAndAgentId(userEntity.getUserId(), agentId, updateAgentRequest);
+        AgentModel agentEntity = this.agentService.updateAgentDetailsByUserIdAndAgentId(userEntity.getUserId(), agentId, updateAgentDetailsRequest);
 
         AgentResponse agentResponse = convertEntityToDto(agentEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Agent details was updated successfully",
+                agentResponse
+        );
+    }
+
+    @PatchMapping("/config")
+    public ResponseEntity<@NonNull GenericResponse<?>> updateAgentConfig(
+            @RequestParam(required = true) UUID agentId,
+            @Valid @RequestBody UpdateAgentConfigRequest updateAgentConfigRequest
+    ) {
+        UserModel userEntity = this.getUserFromSecurityContext();
+        AgentModel agentEntity = this.agentService.updateAgentConfigByUserIdAndAgentId(userEntity.getUserId(), agentId, updateAgentConfigRequest);
+
+        AgentResponse agentResponse = convertEntityToDto(agentEntity);
+        return GenericResponse.genericResponse(
+                HttpStatus.OK,
+                "Agent config was updated successfully",
                 agentResponse
         );
     }
@@ -189,6 +206,7 @@ public class AgentController {
                 .agentId(agentEntity.getAgentId())
                 .name(agentEntity.getName())
                 .description(agentEntity.getDescription())
+                .config(agentEntity.getConfig())
                 .status(agentEntity.getStatus())
                 .createdAt(agentEntity.getCreatedAt())
                 .updatedAt(agentEntity.getUpdatedAt())

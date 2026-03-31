@@ -88,6 +88,10 @@ public class AgentAdminServiceImpl implements AgentAdminService {
             agentEntity.setDescription(updateAgentRequest.getDescription());
         }
 
+        if (updateAgentRequest.getConfig() != null) {
+            agentEntity.setConfig(updateAgentRequest.getConfig());
+        }
+
         if (updateAgentRequest.getStatus() != null) {
             agentEntity.setStatus(updateAgentRequest.getStatus());
         }

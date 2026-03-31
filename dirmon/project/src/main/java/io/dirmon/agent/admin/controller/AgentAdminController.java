@@ -76,6 +76,7 @@ public class AgentAdminController {
         );
     }
 
+    // TODO -> agentConfig fieldları 0 girilememeli
     @PostMapping
     public ResponseEntity<@NonNull GenericResponse<?>> createAgent(
             @Valid @RequestBody CreateAgentRequest createAgentRequest
@@ -89,6 +90,7 @@ public class AgentAdminController {
         );
     }
 
+    // TODO -> agentConfig fieldları 0 girilememeli
     @PatchMapping
     public ResponseEntity<@NonNull GenericResponse<?>> updateAgent(
             @RequestParam(required = true) UUID agentId,
@@ -156,6 +158,7 @@ public class AgentAdminController {
                 .userId(agentEntity.getUser().getUserId())
                 .name(agentEntity.getName())
                 .description(agentEntity.getDescription())
+                .config(agentEntity.getConfig())
                 .status(agentEntity.getStatus())
                 .createdAt(agentEntity.getCreatedAt())
                 .updatedAt(agentEntity.getUpdatedAt())

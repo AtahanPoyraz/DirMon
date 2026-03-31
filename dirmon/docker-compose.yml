@@ -13,29 +13,31 @@ services:
       database:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health/readiness || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
     networks:
       - network
 
   database:
-    image: "postgres:latest"
+    image: "postgres:16"
     container_name: "database"
     env_file:
       - .env
     ports:
       - "5432:5432"
     volumes:
-      - data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    restart: unless-stopped
     networks:
       - network
 
@@ -44,4 +46,4 @@ networks:
     driver: bridge
 
 volumes:
-  data:
+  db_data:

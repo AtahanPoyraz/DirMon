@@ -3,6 +3,7 @@ package io.dirmon.agent.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+// TODO -> agentConfig fieldları 0 girilememeli
 @Getter
 @Setter
 @Builder

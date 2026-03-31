@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateAgentRequest {
+public class UpdateAgentDetailsRequest {
     private String name;
     private String description;
 }

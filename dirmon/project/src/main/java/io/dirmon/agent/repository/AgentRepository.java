@@ -21,6 +21,9 @@ public interface AgentRepository extends JpaRepository<@NonNull AgentModel, @Non
     @NonNull
     Optional<AgentModel> findByName(String name);
 
+    @NonNull
+    Optional<AgentModel> findByNameAndUser_UserId(String name, UUID userId);
+
     @Query("SELECT a FROM AgentModel a WHERE a.user.userId = :userId AND a.agentId = :agentId")
     Optional<AgentModel> findByUserIdAndAgentId(@Param("userId") UUID userId, @Param("agentId") UUID agentId);
 

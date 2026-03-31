@@ -1,7 +1,8 @@
 package io.dirmon.agent.service;
 
 import io.dirmon.agent.dto.CreateAgentRequest;
-import io.dirmon.agent.dto.UpdateAgentRequest;
+import io.dirmon.agent.dto.UpdateAgentConfigRequest;
+import io.dirmon.agent.dto.UpdateAgentDetailsRequest;
 import io.dirmon.agent.model.AgentModel;
 import jakarta.transaction.Transactional;
 
@@ -14,10 +15,13 @@ public interface AgentService {
     AgentModel fetchAgentByUserIdAndAgentId(UUID userId, UUID agentId);
 
     @Transactional
-    AgentModel createAgentByUserIdAndAgentId(UUID userId, CreateAgentRequest createAgentRequest);
+    AgentModel createAgentByUserId(UUID userId, CreateAgentRequest createAgentRequest);
 
     @Transactional
-    AgentModel updateAgentDetailsByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentRequest updateAgentRequest);
+    AgentModel updateAgentDetailsByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentDetailsRequest updateAgentDetailsRequest);
+
+    @Transactional
+    AgentModel updateAgentConfigByUserIdAndAgentId(UUID userId, UUID agentId, UpdateAgentConfigRequest updateAgentConfigRequest);
 
     @Transactional
     AgentModel activateAgentByAgentId(UUID agentId);
