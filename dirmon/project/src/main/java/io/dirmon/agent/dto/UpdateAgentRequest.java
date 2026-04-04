@@ -12,13 +12,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAgentRequest {
+public class UpdateAgentRequest {
     @NotBlank(message = "Agent name cannot be empty")
     private String name;
     private String description;
 
     @Valid
-    @NotNull(message = "Agent config cannot be null")
     private AgentConfigDto config;
 
     @Getter
