@@ -1,4 +1,4 @@
-package io.dirmon.user.admin.dto;
+package io.dirmon.user.dto;
 
 import io.dirmon.user.model.UserRole;
 import lombok.*;
@@ -12,18 +12,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserDto {
     private UUID userId;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
     private EnumSet<UserRole> roles;
-    private boolean enabled;
-    private boolean accountNonExpired;
-    private boolean accountNonLocked;
-    private boolean credentialsNonExpired;
     private Instant lastLogin;
     private Instant createdAt;
-    private Instant updatedAt;
 }

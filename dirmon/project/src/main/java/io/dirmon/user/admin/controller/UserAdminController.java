@@ -2,7 +2,8 @@ package io.dirmon.user.admin.controller;
 
 import io.dirmon.user.admin.dto.CreateUserRequest;
 import io.dirmon.user.admin.dto.UpdateUserRequest;
-import io.dirmon.user.admin.dto.UserResponse;
+import io.dirmon.user.admin.dto.UserDto;
+import io.dirmon.user.admin.mapper.UserAdminMapper;
 import io.dirmon.user.admin.service.UserAdminService;
 import io.dirmon.common.dto.GenericResponse;
 import io.dirmon.user.model.UserModel;
@@ -24,12 +25,15 @@ import java.util.UUID;
 @RequestMapping("/api/v1/user/admin")
 public class UserAdminController {
     private final UserAdminService userAdminService;
+    private final UserAdminMapper userAdminMapper;
 
     @Autowired
     public UserAdminController(
-            UserAdminService userAdminService
+            UserAdminService userAdminService,
+            UserAdminMapper userAdminMapper
     ) {
         this.userAdminService = userAdminService;
+        this.userAdminMapper = userAdminMapper;
     }
 
     @GetMapping
@@ -40,26 +44,26 @@ public class UserAdminController {
     ) {
         if (userId != null) {
             UserModel userEntity = this.userAdminService.fetchUserById(userId);
-            UserResponse userResponse = convertEntityToDto(userEntity);
+            UserDto userDto = this.userAdminMapper.toDto(userEntity);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "User was fetched successfully",
-                    userResponse
+                    userDto
             );
         }
 
         if (email != null) {
             UserModel userEntity = this.userAdminService.fetchUserByEmail(email);
-            UserResponse userResponse = convertEntityToDto(userEntity);
+            UserDto userDto = this.userAdminMapper.toDto(userEntity);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "User was fetched successfully",
-                    userResponse
+                    userDto
             );
         }
 
         Page<@NonNull UserModel> userEntities = this.userAdminService.fetchUsers(pageable);
-        Page<@NonNull UserResponse> userResponses = userEntities.map(UserAdminController::convertEntityToDto);
+        Page<@NonNull UserDto> userResponses = userEntities.map(this.userAdminMapper::toDto);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Users were fetched successfully",
@@ -72,11 +76,11 @@ public class UserAdminController {
             @Valid @RequestBody CreateUserRequest createUserRequest
     ) {
         UserModel userEntity = this.userAdminService.createUser(createUserRequest);
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userAdminMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.CREATED,
                 "User was created successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -86,11 +90,11 @@ public class UserAdminController {
             @Valid @RequestBody UpdateUserRequest updateUserRequest
     ) {
         UserModel userEntity = this.userAdminService.updateUserByUserId(userId, updateUserRequest);
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userAdminMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User was updated successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -121,23 +125,5 @@ public class UserAdminController {
                 "Users were deleted successfully",
                 null
         );
-    }
-
-    private static UserResponse convertEntityToDto(UserModel userEntity) {
-        return UserResponse.builder()
-                .userId(userEntity.getUserId())
-                .firstName(userEntity.getFirstName())
-                .lastName(userEntity.getLastName())
-                .email(userEntity.getEmail())
-                .password(userEntity.getPassword())
-                .roles(EnumSet.copyOf(userEntity.getRoles()))
-                .enabled(userEntity.isEnabled())
-                .accountNonExpired(userEntity.isAccountNonExpired())
-                .accountNonLocked(userEntity.isAccountNonLocked())
-                .credentialsNonExpired(userEntity.isCredentialsNonExpired())
-                .lastLogin(userEntity.getLastLogin())
-                .createdAt(userEntity.getUpdatedAt())
-                .updatedAt(userEntity.getUpdatedAt())
-                .build();
     }
 }

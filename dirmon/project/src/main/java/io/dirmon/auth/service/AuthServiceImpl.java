@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public UserModel signUp(SignUpRequest signUpRequest) {
         if (this.userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new EmailAlreadyExistException("User with email " + signUpRequest.getEmail() + " already exists");
+            throw new EmailAlreadyExistException("UserDto with email " + signUpRequest.getEmail() + " already exists");
         }
 
         UserModel userEntity = UserModel.builder()
@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!userEntity.isEnabled()) {
-            throw new DisabledException("User is disabled");
+            throw new DisabledException("UserDto is disabled");
         }
 
         this.userRepository.updateLastLogin(userEntity.getUserId(), Instant.now());

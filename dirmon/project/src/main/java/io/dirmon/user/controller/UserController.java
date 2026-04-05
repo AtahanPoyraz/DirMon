@@ -3,7 +3,8 @@ package io.dirmon.user.controller;
 import io.dirmon.common.dto.GenericResponse;
 import io.dirmon.user.dto.UpdateDetailsRequest;
 import io.dirmon.user.dto.UpdatePasswordRequest;
-import io.dirmon.user.dto.UserResponse;
+import io.dirmon.user.dto.UserDto;
+import io.dirmon.user.mapper.UserMapper;
 import io.dirmon.user.model.UserModel;
 import io.dirmon.user.service.UserService;
 import jakarta.validation.Valid;
@@ -26,22 +27,25 @@ import java.util.UUID;
 @RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @Autowired
     public UserController(
-            UserService userService
+            UserService userService,
+            UserMapper userMapper
     ) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @GetMapping
     public ResponseEntity<@NonNull GenericResponse<?>> fetchUser() {
         UserModel userEntity = this.getUserFromSecurityContext();
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User was fetched successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -52,11 +56,11 @@ public class UserController {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.updateDetailsByUserId(userEntity.getUserId(), updateDetailsRequest);
 
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User details were updated successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -67,11 +71,11 @@ public class UserController {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.updatePasswordByUserId(userEntity.getUserId(), updatePasswordRequest);
 
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User password was updated successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -80,11 +84,11 @@ public class UserController {
         UserModel userEntity = this.getUserFromSecurityContext();
         userEntity = this.userService.deActivateUserByUserId(userEntity.getUserId());
 
-        UserResponse userResponse = convertEntityToDto(userEntity);
+        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User deactivated was updated successfully",
-                userResponse
+                userDto
         );
     }
 
@@ -110,17 +114,5 @@ public class UserController {
         }
 
         return this.userService.fetchUserByUserId(userId);
-    }
-
-    private static UserResponse convertEntityToDto(UserModel userEntity) {
-        return UserResponse.builder()
-                .userId(userEntity.getUserId())
-                .firstName(userEntity.getFirstName())
-                .lastName(userEntity.getLastName())
-                .email(userEntity.getEmail())
-                .roles(EnumSet.copyOf(userEntity.getRoles()))
-                .lastLogin(userEntity.getLastLogin())
-                .createdAt(userEntity.getUpdatedAt())
-                .build();
     }
 }

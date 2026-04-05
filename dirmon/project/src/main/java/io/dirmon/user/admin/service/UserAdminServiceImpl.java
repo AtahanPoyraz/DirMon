@@ -2,6 +2,7 @@ package io.dirmon.user.admin.service;
 
 import io.dirmon.user.admin.dto.CreateUserRequest;
 import io.dirmon.user.admin.dto.UpdateUserRequest;
+import io.dirmon.user.admin.mapper.UserAdminMapper;
 import io.dirmon.user.exception.EmailAlreadyExistException;
 import io.dirmon.user.exception.UserNotFoundException;
 import io.dirmon.user.model.UserModel;
@@ -22,14 +23,17 @@ import java.util.stream.Collectors;
 public class UserAdminServiceImpl implements UserAdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAdminMapper userAdminMapper;
 
     @Autowired
     public UserAdminServiceImpl(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserAdminMapper userAdminMapper
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAdminMapper = userAdminMapper;
     }
 
     @Override
@@ -53,20 +57,11 @@ public class UserAdminServiceImpl implements UserAdminService {
     @Transactional
     public UserModel createUser(CreateUserRequest createUserRequest) {
         if (this.userRepository.existsByEmail(createUserRequest.getEmail())) {
-            throw new EmailAlreadyExistException("User with email " + createUserRequest.getEmail() + " already exists");
+            throw new EmailAlreadyExistException("User already exists with email " + createUserRequest.getEmail());
         }
 
-        UserModel userEntity = UserModel.builder()
-                .firstName(createUserRequest.getFirstName())
-                .lastName(createUserRequest.getLastName())
-                .email(createUserRequest.getEmail())
-                .password(this.passwordEncoder.encode(createUserRequest.getPassword()))
-                .roles(Optional.ofNullable(createUserRequest.getRoles()).map(EnumSet::copyOf).orElse(EnumSet.of(UserRole.ROLE_USER)))
-                .enabled(createUserRequest.getEnabled() != null ? createUserRequest.getEnabled() : true)
-                .accountNonExpired(createUserRequest.getAccountNonExpired() != null ? createUserRequest.getAccountNonExpired() : true)
-                .accountNonLocked(createUserRequest.getAccountNonLocked() != null ? createUserRequest.getAccountNonLocked() : true)
-                .credentialsNonExpired(createUserRequest.getCredentialsNonExpired() != null ? createUserRequest.getCredentialsNonExpired() : true)
-                .build();
+        UserModel userEntity = this.userAdminMapper.toEntity(createUserRequest);
+        userEntity.setPassword(this.passwordEncoder.encode(createUserRequest.getPassword()));
 
         return this.userRepository.save(userEntity);
     }
@@ -77,44 +72,24 @@ public class UserAdminServiceImpl implements UserAdminService {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
-        if (updateUserRequest.getFirstName() != null && !updateUserRequest.getFirstName().isEmpty()) {
-            userEntity.setFirstName(updateUserRequest.getFirstName());
-        }
+        this.userAdminMapper.updateUserToEntity(updateUserRequest, userEntity);
 
-        if (updateUserRequest.getLastName() != null && !updateUserRequest.getLastName().isEmpty()) {
-            userEntity.setLastName(updateUserRequest.getLastName());
-        }
-
-        if (updateUserRequest.getEmail() != null && !updateUserRequest.getEmail().isEmpty()) {
-            if (this.userRepository.existsByEmail(updateUserRequest.getEmail())) {
-                throw new EmailAlreadyExistException("User with email " + updateUserRequest.getEmail() + " already exists");
+        String newEmail = updateUserRequest.getEmail();
+        if (newEmail != null && !newEmail.isEmpty() && !newEmail.equals(userEntity.getEmail())) {
+            if (this.userRepository.existsByEmail(newEmail)) {
+                throw new EmailAlreadyExistException("User already exists with email " + newEmail);
             }
 
-            userEntity.setEmail(updateUserRequest.getEmail());
+            userEntity.setEmail(newEmail);
         }
 
-        if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
-            userEntity.setPassword(this.passwordEncoder.encode(updateUserRequest.getPassword()));
+        String newPassword = updateUserRequest.getPassword();
+        if (newPassword != null && !newPassword.isEmpty()) {
+            userEntity.setPassword(this.passwordEncoder.encode(newPassword));
         }
 
         if (updateUserRequest.getRoles() != null) {
             userEntity.setRoles(EnumSet.copyOf(updateUserRequest.getRoles()));
-        }
-
-        if (updateUserRequest.getEnabled() != null) {
-            userEntity.setEnabled(updateUserRequest.getEnabled());
-        }
-
-        if (updateUserRequest.getAccountNonExpired() != null) {
-            userEntity.setAccountNonExpired(updateUserRequest.getAccountNonExpired());
-        }
-
-        if (updateUserRequest.getAccountNonLocked() != null) {
-            userEntity.setAccountNonLocked(updateUserRequest.getAccountNonLocked());
-        }
-
-        if (updateUserRequest.getCredentialsNonExpired() != null) {
-            userEntity.setCredentialsNonExpired(updateUserRequest.getCredentialsNonExpired());
         }
 
         return this.userRepository.save(userEntity);
