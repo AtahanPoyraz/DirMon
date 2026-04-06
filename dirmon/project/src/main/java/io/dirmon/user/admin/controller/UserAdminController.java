@@ -63,11 +63,11 @@ public class UserAdminController {
         }
 
         Page<@NonNull UserModel> userEntities = this.userAdminService.fetchUsers(pageable);
-        Page<@NonNull UserDto> userResponses = userEntities.map(this.userAdminMapper::toDto);
+        Page<@NonNull UserDto> userDtos = userEntities.map(this.userAdminMapper::toDto);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Users were fetched successfully",
-                userResponses
+                userDtos
         );
     }
 
