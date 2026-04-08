@@ -2,31 +2,33 @@ package io.dirmon.user.admin.service;
 
 import io.dirmon.user.admin.dto.CreateUserRequest;
 import io.dirmon.user.admin.dto.UpdateUserRequest;
-import io.dirmon.user.model.UserModel;
-import jakarta.transaction.Transactional;
+import io.dirmon.user.admin.dto.UserDto;
+import io.dirmon.user.exception.EmailAlreadyExistException;
+import io.dirmon.user.exception.UserNotFoundException;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UserAdminService {
-    Page<@NonNull UserModel> fetchUsers(Pageable pageable);
+    Page<@NonNull UserDto> fetchUsers(Pageable pageable);
 
-    UserModel fetchUserById(UUID userId);
+    UserDto fetchUserById(UUID userId) throws UserNotFoundException;
 
-    UserModel fetchUserByEmail(String email);
-
-    @Transactional
-    UserModel createUser(CreateUserRequest createUserRequest);
+    UserDto fetchUserByEmail(String email) throws UserNotFoundException;
 
     @Transactional
-    UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest);
+    UserDto createUser(CreateUserRequest createUserRequest) throws EmailAlreadyExistException;
 
     @Transactional
-    void deleteUserByUserId(UUID userId);
+    UserDto updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest) throws UserNotFoundException, EmailAlreadyExistException;
 
     @Transactional
-    void deleteUserByUserIds(List<UUID> userIds);
+    void deleteUserByUserId(UUID userId) throws UserNotFoundException;
+
+    @Transactional
+    void deleteUserByUserIds(List<UUID> userIds) throws UserNotFoundException;
 }

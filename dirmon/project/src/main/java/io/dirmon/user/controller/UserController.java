@@ -4,8 +4,6 @@ import io.dirmon.common.dto.GenericResponse;
 import io.dirmon.user.dto.UpdateDetailsRequest;
 import io.dirmon.user.dto.UpdatePasswordRequest;
 import io.dirmon.user.dto.UserDto;
-import io.dirmon.user.mapper.UserMapper;
-import io.dirmon.user.model.UserModel;
 import io.dirmon.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -19,7 +17,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,21 +24,18 @@ import java.util.UUID;
 @RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
-    private final UserMapper userMapper;
 
     @Autowired
     public UserController(
-            UserService userService,
-            UserMapper userMapper
+            UserService userService
     ) {
         this.userService = userService;
-        this.userMapper = userMapper;
     }
 
     @GetMapping
     public ResponseEntity<@NonNull GenericResponse<?>> fetchUser() {
-        UserModel userEntity = this.getUserFromSecurityContext();
-        UserDto userDto = this.userMapper.toDto(userEntity);
+        UserDto userDto = this.getUserFromSecurityContext();
+
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User was fetched successfully",
@@ -53,10 +47,9 @@ public class UserController {
     public ResponseEntity<@NonNull GenericResponse<?>> updateUserDetails(
             @Valid @RequestBody UpdateDetailsRequest updateDetailsRequest
     ) {
-        UserModel userEntity = this.getUserFromSecurityContext();
-        userEntity = this.userService.updateDetailsByUserId(userEntity.getUserId(), updateDetailsRequest);
+        UserDto userDto = this.getUserFromSecurityContext();
+        userDto = this.userService.updateDetailsByUserId(userDto.getUserId(), updateDetailsRequest);
 
-        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User details were updated successfully",
@@ -68,10 +61,9 @@ public class UserController {
     public ResponseEntity<@NonNull GenericResponse<?>> updateUserPassword(
             @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest
     ) {
-        UserModel userEntity = this.getUserFromSecurityContext();
-        userEntity = this.userService.updatePasswordByUserId(userEntity.getUserId(), updatePasswordRequest);
+        UserDto userDto = this.getUserFromSecurityContext();
+        userDto = this.userService.updatePasswordByUserId(userDto.getUserId(), updatePasswordRequest);
 
-        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User password was updated successfully",
@@ -81,10 +73,9 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<@NonNull GenericResponse<?>> deActivateUser() {
-        UserModel userEntity = this.getUserFromSecurityContext();
-        userEntity = this.userService.deActivateUserByUserId(userEntity.getUserId());
+        UserDto userDto = this.getUserFromSecurityContext();
+        userDto = this.userService.deActivateUserByUserId(userDto.getUserId());
 
-        UserDto userDto = this.userMapper.toDto(userEntity);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User deactivated was updated successfully",
@@ -92,7 +83,7 @@ public class UserController {
         );
     }
 
-    private UserModel getUserFromSecurityContext() throws AuthenticationCredentialsNotFoundException, BadCredentialsException {
+    private UserDto getUserFromSecurityContext() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
 
@@ -101,11 +92,11 @@ public class UserController {
         }
 
         if (!authentication.isAuthenticated()) {
-            throw new AuthenticationCredentialsNotFoundException("Authentication credentials not found");
+            throw new AuthenticationCredentialsNotFoundException("User is not authenticated");
         }
 
         if (Objects.equals(authentication.getPrincipal(), "anonymousUser")) {
-            throw new AuthenticationCredentialsNotFoundException("Authentication credentials not found");
+            throw new AuthenticationCredentialsNotFoundException("Anonymous user is not allowed");
         }
 
         Object principal = authentication.getPrincipal();

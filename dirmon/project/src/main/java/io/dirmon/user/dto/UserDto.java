@@ -18,6 +18,7 @@ public class UserDto {
     private String lastName;
     private String email;
     private EnumSet<UserRole> roles;
+    private boolean enabled;
     private Instant lastLogin;
     private Instant createdAt;
 }

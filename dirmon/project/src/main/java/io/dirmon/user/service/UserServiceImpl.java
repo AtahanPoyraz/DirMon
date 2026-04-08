@@ -1,16 +1,17 @@
 package io.dirmon.user.service;
 
+import io.dirmon.user.dto.UserDto;
 import io.dirmon.user.exception.UserNotFoundException;
 import io.dirmon.user.dto.UpdateDetailsRequest;
 import io.dirmon.user.dto.UpdatePasswordRequest;
 import io.dirmon.user.mapper.UserMapper;
 import io.dirmon.user.model.UserModel;
 import io.dirmon.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -32,45 +33,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel fetchUserByUserId(UUID userId) {
-        return this.userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("UserDto not found with id: " + userId));
+    public UserDto fetchUserByUserId(UUID userId) throws UserNotFoundException {
+        UserModel userEntity = this.userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        return this.userMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public UserModel updateDetailsByUserId(UUID userId, UpdateDetailsRequest updateDetailsRequest) {
+    public UserDto updateDetailsByUserId(UUID userId, UpdateDetailsRequest updateDetailsRequest) throws UserNotFoundException {
         UserModel userEntity = this.userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("UserDto not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
         this.userMapper.updateUserDetailsToEntity(updateDetailsRequest, userEntity);
 
-        return this.userRepository.save(userEntity);
+        userEntity = this.userRepository.save(userEntity);
+        return this.userMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public UserModel updatePasswordByUserId(UUID userId, UpdatePasswordRequest updatePasswordRequest) {
+    public UserDto updatePasswordByUserId(UUID userId, UpdatePasswordRequest updatePasswordRequest) throws UserNotFoundException, BadCredentialsException {
         UserModel userEntity = this.userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("UserDto not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
         if (!this.passwordEncoder.matches(updatePasswordRequest.getPassword(), userEntity.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
 
+        if (updatePasswordRequest.getPassword().equals(updatePasswordRequest.getNewPassword())) {
+            throw new BadCredentialsException("New password must differ from the current password");
+        }
+
         userEntity.setPassword(this.passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
 
-        return this.userRepository.save(userEntity);
+        userEntity = this.userRepository.save(userEntity);
+        return this.userMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public UserModel deActivateUserByUserId(UUID userId) {
+    public UserDto deActivateUserByUserId(UUID userId) throws UserNotFoundException {
         UserModel userEntity = this.userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("UserDto not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
         userEntity.setEnabled(false);
 
-        return this.userRepository.save(userEntity);
+        userEntity = this.userRepository.save(userEntity);
+        return this.userMapper.toDto(userEntity);
     }
 }

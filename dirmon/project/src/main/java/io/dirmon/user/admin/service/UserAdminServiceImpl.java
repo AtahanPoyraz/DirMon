@@ -2,19 +2,19 @@ package io.dirmon.user.admin.service;
 
 import io.dirmon.user.admin.dto.CreateUserRequest;
 import io.dirmon.user.admin.dto.UpdateUserRequest;
+import io.dirmon.user.admin.dto.UserDto;
 import io.dirmon.user.admin.mapper.UserAdminMapper;
 import io.dirmon.user.exception.EmailAlreadyExistException;
 import io.dirmon.user.exception.UserNotFoundException;
 import io.dirmon.user.model.UserModel;
-import io.dirmon.user.model.UserRole;
 import io.dirmon.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,25 +37,30 @@ public class UserAdminServiceImpl implements UserAdminService {
     }
 
     @Override
-    public Page<@NonNull UserModel> fetchUsers(@NonNull Pageable pageable) {
-        return this.userRepository.findAll(pageable);
+    public Page<@NonNull UserDto> fetchUsers(@NonNull Pageable pageable) {
+        return this.userRepository.findAll(pageable)
+                .map(this.userAdminMapper::toDto);
     }
 
     @Override
-    public UserModel fetchUserById(@NonNull UUID userId) {
-        return this.userRepository.findById(userId)
+    public UserDto fetchUserById(@NonNull UUID userId) throws UserNotFoundException {
+        UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        return this.userAdminMapper.toDto(userEntity);
     }
 
     @Override
-    public UserModel fetchUserByEmail(@NonNull String email) {
-        return this.userRepository.findByEmail(email)
+    public UserDto fetchUserByEmail(@NonNull String email) throws UserNotFoundException {
+        UserModel userEntity = this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+        return this.userAdminMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public UserModel createUser(CreateUserRequest createUserRequest) {
+    public UserDto createUser(CreateUserRequest createUserRequest) throws EmailAlreadyExistException {
         if (this.userRepository.existsByEmail(createUserRequest.getEmail())) {
             throw new EmailAlreadyExistException("User already exists with email " + createUserRequest.getEmail());
         }
@@ -63,12 +68,13 @@ public class UserAdminServiceImpl implements UserAdminService {
         UserModel userEntity = this.userAdminMapper.toEntity(createUserRequest);
         userEntity.setPassword(this.passwordEncoder.encode(createUserRequest.getPassword()));
 
-        return this.userRepository.save(userEntity);
+        userEntity = this.userRepository.save(userEntity);
+        return this.userAdminMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest) {
+    public UserDto updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest) throws UserNotFoundException, EmailAlreadyExistException {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
@@ -92,12 +98,13 @@ public class UserAdminServiceImpl implements UserAdminService {
             userEntity.setRoles(EnumSet.copyOf(updateUserRequest.getRoles()));
         }
 
-        return this.userRepository.save(userEntity);
+        userEntity = this.userRepository.save(userEntity);
+        return this.userAdminMapper.toDto(userEntity);
     }
 
     @Override
     @Transactional
-    public void deleteUserByUserId(UUID userId) {
+    public void deleteUserByUserId(UUID userId) throws UserNotFoundException {
         UserModel userEntity = this.userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
@@ -106,14 +113,14 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     @Override
     @Transactional
-    public void deleteUserByUserIds(List<UUID> userIds) {
+    public void deleteUserByUserIds(List<UUID> userIds) throws UserNotFoundException {
         List<UserModel> userEntities = this.userRepository.findAllById(userIds);
-        Set<UUID> foundIds = userEntities.stream()
+        Set<UUID> foundUserIds = userEntities.stream()
                 .map(UserModel::getUserId)
                 .collect(Collectors.toSet());
 
         userIds.stream()
-                .filter(userId -> !foundIds.contains(userId))
+                .filter(userId -> !foundUserIds.contains(userId))
                 .findFirst()
                 .ifPresent(missingId -> {
                     throw new UserNotFoundException("User not found with id: " + missingId);

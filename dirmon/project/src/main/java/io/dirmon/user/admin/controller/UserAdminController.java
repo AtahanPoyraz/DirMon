@@ -25,15 +25,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/user/admin")
 public class UserAdminController {
     private final UserAdminService userAdminService;
-    private final UserAdminMapper userAdminMapper;
 
     @Autowired
     public UserAdminController(
-            UserAdminService userAdminService,
-            UserAdminMapper userAdminMapper
+            UserAdminService userAdminService
     ) {
         this.userAdminService = userAdminService;
-        this.userAdminMapper = userAdminMapper;
     }
 
     @GetMapping
@@ -43,8 +40,7 @@ public class UserAdminController {
             @ParameterObject Pageable pageable
     ) {
         if (userId != null) {
-            UserModel userEntity = this.userAdminService.fetchUserById(userId);
-            UserDto userDto = this.userAdminMapper.toDto(userEntity);
+            UserDto userDto = this.userAdminService.fetchUserById(userId);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "User was fetched successfully",
@@ -53,8 +49,7 @@ public class UserAdminController {
         }
 
         if (email != null) {
-            UserModel userEntity = this.userAdminService.fetchUserByEmail(email);
-            UserDto userDto = this.userAdminMapper.toDto(userEntity);
+            UserDto userDto = this.userAdminService.fetchUserByEmail(email);
             return GenericResponse.genericResponse(
                     HttpStatus.OK,
                     "User was fetched successfully",
@@ -62,8 +57,7 @@ public class UserAdminController {
             );
         }
 
-        Page<@NonNull UserModel> userEntities = this.userAdminService.fetchUsers(pageable);
-        Page<@NonNull UserDto> userDtos = userEntities.map(this.userAdminMapper::toDto);
+        Page<@NonNull UserDto> userDtos = this.userAdminService.fetchUsers(pageable);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "Users were fetched successfully",
@@ -75,8 +69,7 @@ public class UserAdminController {
     public ResponseEntity<@NonNull GenericResponse<?>> createUser(
             @Valid @RequestBody CreateUserRequest createUserRequest
     ) {
-        UserModel userEntity = this.userAdminService.createUser(createUserRequest);
-        UserDto userDto = this.userAdminMapper.toDto(userEntity);
+        UserDto userDto = this.userAdminService.createUser(createUserRequest);
         return GenericResponse.genericResponse(
                 HttpStatus.CREATED,
                 "User was created successfully",
@@ -89,8 +82,7 @@ public class UserAdminController {
             @RequestParam(required = true) UUID userId,
             @Valid @RequestBody UpdateUserRequest updateUserRequest
     ) {
-        UserModel userEntity = this.userAdminService.updateUserByUserId(userId, updateUserRequest);
-        UserDto userDto = this.userAdminMapper.toDto(userEntity);
+        UserDto userDto = this.userAdminService.updateUserByUserId(userId, updateUserRequest);
         return GenericResponse.genericResponse(
                 HttpStatus.OK,
                 "User was updated successfully",
@@ -105,7 +97,7 @@ public class UserAdminController {
         if (userId.isEmpty()) {
             return GenericResponse.genericResponse(
                     HttpStatus.BAD_REQUEST,
-                    "No userIds provided",
+                    "No userId provided",
                     null
             );
         }

@@ -42,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(signUpRequest.getLastName())
                 .email(signUpRequest.getEmail())
                 .password(this.passwordEncoder.encode(signUpRequest.getPassword()))
-                .roles(EnumSet.of(UserRole.ROLE_USER))
+                .roles(EnumSet.of(UserRole.USER))
                 .enabled(true)
                 .accountNonExpired(true)
                 .accountNonLocked(true)

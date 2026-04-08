@@ -24,48 +24,48 @@ public class UserModel implements UserDetails {
     @Column(name = "user_id", unique = true, nullable = false, updatable = false)
     private UUID userId;
 
-    @Column(name = "first_name", unique = false, nullable = false, updatable = true)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name", unique = false, nullable = false, updatable = true)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "email", unique = true, nullable = false, updatable = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password", unique = false, nullable = false, updatable = true)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "roles", unique = false, nullable = false, updatable = true)
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles = new HashSet<>();
 
     @Builder.Default
-    @Column(name = "enabled", unique = false, nullable = false, updatable = true)
+    @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
     @Builder.Default
-    @Column(name = "account_non_expired", unique = false, nullable = false, updatable = true)
+    @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired = true;
 
     @Builder.Default
-    @Column(name = "account_non_locked", unique = false, nullable = false, updatable = true)
+    @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked = true;
 
     @Builder.Default
-    @Column(name = "credentials_non_expired", unique = false, nullable = false, updatable = true)
+    @Column(name = "credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired = true;
 
-    @Column(name = "last_login", unique = false, nullable = true, updatable = true)
+    @Column(name = "last_login")
     private Instant lastLogin;
 
-    @Column(name = "created_at", unique = false, nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Column(name = "updated_at", unique = false, nullable = false, updatable = true)
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
     @Builder.Default
@@ -151,7 +151,7 @@ public class UserModel implements UserDetails {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
+                ", password='" + "[PROTECTED]" + '\'' +
                 ", roles=" + roles +
                 ", enabled=" + enabled +
                 ", accountNonExpired=" + accountNonExpired +
